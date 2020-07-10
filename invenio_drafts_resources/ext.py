@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2020 CERN.
+# Copyright (C) 2020 Northwestern University.
 #
 # Invenio-Drafts-Resources is free software; you can redistribute it and/or
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
 """Invenio Drafts Resources module to create REST APIs."""
-
-from flask_babelex import gettext as _
-
-from . import config
-from .resources import DraftResource
 
 
 class InvenioDraftsResources(object):
@@ -30,5 +26,5 @@ class InvenioDraftsResources(object):
     def init_config(self, app):
         """Initialize configuration."""
         for k in dir(config):
-            if k.startswith("RECORDS_RESOURCES_"):
+            if k.startswith("DRAFTS_RESOURCES_"):
                 app.config.setdefault(k, getattr(config, k))

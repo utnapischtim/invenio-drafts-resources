@@ -9,17 +9,9 @@
 
 """Invenio Drafts Resources module to create REST APIs."""
 
-from flask import g
-from flask_resources import CollectionResource
+from flask_resources import CollectionResource, SingletonResource
 from flask_resources.context import resource_requestctx
-from flask_resources.loaders import RequestLoader
 from flask_resources.resources import ResourceConfig
-
-from ..responses import RecordResponse
-from ..schemas import RecordSchemaJSONV1
-from ..serializers import RecordJSONSerializer
-from ..service import RecordService
-
 
 # TODO: Get rid of them when implementation is done
 STUB_ITEM_RESULT = ({"TODO": "IMPLEMENT ME"}, 200)
@@ -29,13 +21,11 @@ STUB_LIST_RESULT = ([{"TODO": "IMPLEMENT ME"}], 200)
 class DraftResourceConfig(ResourceConfig):
     """Draft resource config."""
 
-    item_route = "/records/<pid_value>/draft"
-    # WARNING: Needed for creation, but breaks read / search!
     list_route = "/records/<pid_value>/draft"
 
 
-class DraftResource(CollectionResource):
-    """Record resource."""
+class DraftResource(SingletonResource):
+    """Draft resource."""
 
     default_config = DraftResourceConfig
 
@@ -43,8 +33,6 @@ class DraftResource(CollectionResource):
         """Read an item."""
         return STUB_ITEM_RESULT
 
-    # WARNING: Create was only meant for list_route! Flask-Resource doesn't
-    #          support item_route creation, so this is ... strange
     def create(self, *args, **kwargs):
         """Create an item."""
         return STUB_ITEM_RESULT
@@ -71,10 +59,26 @@ class DraftVersionResource(CollectionResource):
 
     def search(self, *args, **kwargs):
         """Perform a search over the items."""
-        # TODO: THIS IS A STUB. CHANGE ME FOR ACTUAL BUSINESS LOGIC
         return STUB_LIST_RESULT
 
     def create(self, *args, **kwargs):
         """Create an item."""
-        # TODO: THIS IS A STUB. CHANGE ME FOR ACTUAL BUSINESS LOGIC
         return STUB_ITEM_RESULT
+
+
+class DraftActionResourceConfig(ResourceConfig):
+    """Draft action resource config."""
+
+    list_route = "/records/<pid_value>/draft/actions/<action>"
+
+
+class DraftActionResource(SingletonResource):
+    """Draft action resource."""
+
+    default_config = DraftActionResourceConfig
+
+    def create(self, *args, **kwargs):
+        """Any POST business logic."""
+        if resource_requestctx.route["action"] == "publish":
+            return STUB_ITEM_RESULT
+        return {}, 200

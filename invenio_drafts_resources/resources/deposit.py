@@ -9,17 +9,8 @@
 
 """Invenio Deposits Resources."""
 
-from flask import g
 from flask_resources import CollectionResource
-from flask_resources.context import resource_requestctx
-from flask_resources.loaders import RequestLoader
 from flask_resources.resources import ResourceConfig
-
-from ..responses import RecordResponse
-from ..schemas import RecordSchemaJSONV1
-from ..serializers import RecordJSONSerializer
-from ..service import RecordService
-
 
 # TODO: Get rid of them when implementation is done
 STUB_ITEM_RESULT = ({"TODO": "IMPLEMENT ME"}, 200)
@@ -35,11 +26,10 @@ class DepositResourceConfig(ResourceConfig):
 
 
 class DepositResource(CollectionResource):
-    """Record resource."""
+    """Deposit resource."""
 
     default_config = DepositResourceConfig
 
     def search(self, *args, **kwargs):
         """Perform a search over the items."""
-        # TODO: THIS IS A STUB. CHANGE ME FOR ACTUAL BUSINESS LOGIC
         return STUB_LIST_RESULT

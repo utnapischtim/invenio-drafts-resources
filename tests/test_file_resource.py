@@ -8,9 +8,10 @@
 
 """Invenio Drafts Resources module to create REST APIs"""
 
-from invenio_drafts_resources.resources import DraftActionResource, \
-    DraftActionResourceConfig, DraftResource, DraftResourceConfig, \
-    DraftVersionResource, DraftVersionResourceConfig
+
+from invenio_drafts_resources.resources import DraftFileActionResource, \
+    DraftFileActionResourceConfig, DraftFileResource, \
+    DraftFileResourceConfig
 
 HEADERS = {"content-type": "application/json", "accept": "application/json"}
 

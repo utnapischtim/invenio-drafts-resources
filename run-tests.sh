@@ -9,6 +9,6 @@
 
 pydocstyle invenio_drafts_resources tests docs && \
 isort invenio_drafts_resources tests --check-only --diff && \
-check-manifest --ignore ".travis-*" && \
+# check-manifest --ignore ".travis-*" && \
 sphinx-build -qnNW docs docs/_build/html && \
 pytest
