@@ -135,7 +135,8 @@ class RecordDraftService(RecordService):
         db.session.commit()  # Persist DB
         # Index the record
         if self.indexer:
+            # FIXME: /invenio-drafts-resources/issues/21
+            # self.indexer.delete(draft)
             self.indexer.index(record)
-            self.indexer.delete(draft)
 
         return self.resource_unit(pid=pid, record=record)
