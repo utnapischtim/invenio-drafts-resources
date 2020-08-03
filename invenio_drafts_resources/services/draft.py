@@ -10,6 +10,8 @@
 
 """Draft Service."""
 
+import uuid
+
 from invenio_db import db
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
@@ -95,9 +97,9 @@ class RecordDraftService(RecordService):
         """
         self.require_permission(identity, "create")
         validated_data = self.draft_data_validator.validate(data)
-        draft = self.draft_cls.create(validated_data)
-        # Create PID (New) associated to the draft UUID
-        pid = self.minter(record_uuid=draft.id, data=draft)
+        rec_uuid = uuid.uuid4()
+        pid = self.minter(record_uuid=rec_uuid, data=validated_data)
+        draft = self.draft_cls.create(validated_data, id_=rec_uuid)
 
         db.session.commit()  # Persist DB
         if self.indexer:
@@ -113,7 +115,8 @@ class RecordDraftService(RecordService):
         pid, record = self.resolve(id_)
         self.require_permission(identity, "create")
         validated_data = self.draft_data_validator.validate(data)
-        draft = self.draft_cls.create(validated_data, record)
+        draft = self.draft_cls.create(validated_data, id_=record.id,
+                                      fork_version_id=record.revision_id)
         db.session.commit()  # Persist DB
         if self.indexer:
             self.indexer.index(draft)
@@ -127,8 +130,10 @@ class RecordDraftService(RecordService):
         pid, draft = self.resolve_draft(id_=id_)
         # Validate and create record, register PID
         data = draft.dumps()
-        self.data_validator.validate(data)  # Validate against record schema
-        record = self.record_cls.create(data, id_=draft.id)  # Use same UUID
+        # Validate against record schema
+        validated_data = self.data_validator.validate(data)
+        # Use same UUID
+        record = self.record_cls.create(validated_data, id_=draft.id)
         pid.register()
         # Remove draft
         draft.delete()
