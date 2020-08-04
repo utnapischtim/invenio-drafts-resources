@@ -21,6 +21,7 @@ from invenio_records_resources.services import MarshmallowDataValidator, \
 from ..resource_units import IdentifiedRecordDraft
 from .permissions import DraftPermissionPolicy
 from .schemas import DraftMetadataSchemaJSONV1
+from .search import draft_record_to_index
 
 
 class RecordDraftServiceConfig(RecordServiceConfig):
@@ -33,6 +34,7 @@ class RecordDraftServiceConfig(RecordServiceConfig):
     resource_unit_cls = IdentifiedRecordDraft
 
     # DraftService configuration.
+    record_to_index = draft_record_to_index
     # WHY: We want to force user input choice here.
     draft_cls = None
     draft_data_validator = MarshmallowDataValidator(
@@ -54,6 +56,13 @@ class RecordDraftService(RecordService):
             pid_type=self.config.resolver_pid_type,
             getter=self.record_cls.get_record,
             registered_only=False
+        )
+
+    @property
+    def indexer(self):
+        """Factory for creating an indexer instance."""
+        return self.config.indexer_cls(
+            record_to_index=self.config.record_to_index
         )
 
     # Draft attrs
@@ -140,8 +149,7 @@ class RecordDraftService(RecordService):
         db.session.commit()  # Persist DB
         # Index the record
         if self.indexer:
-            # FIXME: /invenio-drafts-resources/issues/21
-            # self.indexer.delete(draft)
+            self.indexer.delete(draft)
             self.indexer.index(record)
 
         return self.resource_unit(pid=pid, record=record)
