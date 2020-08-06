@@ -24,6 +24,7 @@ from invenio_records_permissions.policies.records import RecordPermissionPolicy
 from invenio_records_resources.resources import RecordResource
 from invenio_records_resources.services import RecordService, \
     RecordServiceConfig
+from invenio_search import RecordsSearch
 
 from invenio_drafts_resources.drafts import DraftBase, DraftMetadataBase
 from invenio_drafts_resources.resources import DraftActionResource, \
@@ -69,10 +70,20 @@ class CustomRecord(Record):
     model_cls = CustomRecordMetadata
 
 
+class TestSearch(RecordsSearch):
+    """Test record search."""
+
+    class Meta:
+        """Test configuration."""
+
+        index = "records"
+
+
 class CustomRecordServiceConfig(RecordServiceConfig):
     """Custom draft service config."""
 
     record_cls = CustomRecord
+    search_cls = TestSearch
     permission_policy_cls = AnyUserPermissionPolicy
 
 
@@ -81,6 +92,7 @@ class CustomRecordDraftServiceConfig(RecordDraftServiceConfig):
 
     draft_cls = CustomDraft
     record_cls = CustomRecord
+    search_cls = TestSearch
     permission_policy_cls = AnyUserPermissionPolicy
 
 
@@ -96,7 +108,9 @@ def app_config(app_config):
     https://github.com/inveniosoftware/invenio-records-permissions/issues/51
     """
     app_config["RECORDS_REST_ENDPOINTS"] = {}
-
+    app_config["INDEXER_DEFAULT_DOC_TYPE"] = "testrecord"
+    app_config["INDEXER_DEFAULT_INDEX"] = TestSearch.Meta.index
+    app_config["SEARCH_MAPPINGS"] = ['drafts', 'records']
     return app_config
 
 
@@ -104,6 +118,15 @@ def app_config(app_config):
 def create_app(instance_path):
     """Application factory fixture."""
     return create_api
+
+
+@pytest.fixture(scope="module")
+def base_app(base_app):
+    """Base application factory fixture."""
+    search = base_app.extensions["invenio-search"]
+    search.register_mappings(TestSearch.Meta.index, 'mock_module.mappings')
+    search.register_mappings('drafts', 'mock_module.mappings')
+    yield base_app
 
 
 def _draft_service():
