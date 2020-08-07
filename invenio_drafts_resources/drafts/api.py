@@ -38,6 +38,8 @@ class DraftBase(Record):
     @classmethod
     def create(cls, data, id_, fork_version_id=None, **kwargs):
         """Create a new draft instance and store it in the database."""
+        # FIXME: version_id + 2 because 1 of the -1 taken in
+        # the property (RecordBase class) and 1 to increment
         with db.session.begin_nested():
             draft = cls(data)
 
@@ -46,6 +48,7 @@ class DraftBase(Record):
             draft.model = cls.model_cls(
                 id=id_,
                 fork_version_id=fork_version_id,
+                version_id=fork_version_id + 2 if fork_version_id else None,
                 expiry_date=draft.expiry_date,
                 status=draft.status,
                 json=draft,

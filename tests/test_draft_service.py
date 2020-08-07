@@ -34,6 +34,46 @@ def test_create_draft_of_new_record(app, draft_service, input_draft,
 def test_create_draft_of_existing_record(app, draft_service, record_service,
                                          input_record, fake_identity):
     """Test draft creation of an existing record."""
+    # FIXME: Since there are no files changes creation of a new draft of a
+    # record is always a new revision (next test)
+    # Needs `app` context because of invenio_access/permissions.py#166
+    # Create new record
+    # identified_record = record_service.create(
+    #     data=input_record, identity=fake_identity
+    # )
+
+    # recid = identified_record.id
+    # assert recid
+    # assert identified_record.record.revision_id == 0
+
+    # for key, value in input_record.items():
+    #     assert identified_record.record[key] == value
+
+    # # Create new draft of said record
+    # orig_title = input_record['title']
+    # input_record['title'] = "Edited title"
+    # identified_draft = draft_service.create(
+    #     data=input_record,
+    #     identity=fake_identity,
+    #     id_=recid
+    # )
+
+    # # Diff id and rev is 0, it is a new version not revision
+    # assert identified_draft.id != recid
+    # assert identified_draft.record.revision_id == 0
+
+    # for key, value in input_record.items():
+    #     assert identified_draft.record[key] == value
+
+    # # Check the actual record was not modified
+    # identified_record = draft_service.read(id_=recid, identity=fake_identity)
+
+    # assert identified_record.record['title'] == orig_title
+
+
+def test_create_a_new_record_revision(app, draft_service, record_service,
+                                      input_record, fake_identity):
+    """Test draft creation of an existing record."""
     # Needs `app` context because of invenio_access/permissions.py#166
     # Create new record
     identified_record = record_service.create(
@@ -56,6 +96,7 @@ def test_create_draft_of_existing_record(app, draft_service, record_service,
         id_=recid
     )
 
+    # Diff revision: same pid and rev+1
     assert identified_draft.id == recid
     assert identified_draft.record.revision_id == 1
 
@@ -119,7 +160,7 @@ def test_publish_draft_of_new_record(app, draft_service, input_record,
 
 
 def test_create_new_version_of_record(app, draft_service, input_record,
-                                     fake_identity):
+                                      fake_identity):
     """Creates a new version of a record.
 
     Publishes the draft to obtain 2 versions of a record.
@@ -152,7 +193,6 @@ def test_create_new_version_of_record(app, draft_service, input_record,
         id_=identified_record_1.id, identity=fake_identity
     )
 
-    import ipdb; ipdb.set_trace(context=10)
     assert identified_draft_2.id != identified_record_1.id
     for pid in identified_draft_2.pids:
         assert pid.status == PIDStatus.RESERVED
@@ -170,5 +210,5 @@ def test_create_new_version_of_record(app, draft_service, input_record,
 
     assert identified_record_2.record.revision_id == 0
 
-    assert identified_record_1.record['conceptpid'] == \
-        identified_record_2.record['conceptpid']
+    assert identified_record_1.record['conceptrecid'] == \
+        identified_record_2.record['conceptrecid']

@@ -9,6 +9,7 @@
 
 """Draft minter."""
 
+from invenio_pidrelations.contrib.versioning import PIDNodeVersioning
 from invenio_pidstore.minters import recid_minter_v2
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
@@ -34,11 +35,18 @@ RecordIdProviderV2.default_status_with_obj = PIDStatus.RESERVED
 def versioned_recid_minter_v2(record_uuid, data):
     """Rserve the Concept RECID and create the RECID."""
     if 'conceptrecid' not in data:
-        conceptrecid_minter_v2(data=data)
+        conceptrecid = conceptrecid_minter_v2(data=data)
     else:
-        # FIXME: Assuming its a version() call + Not nice here (use PIDRelations)
+        conceptrecid = PersistentIdentifier.get(
+            pid_type='recid',
+            pid_value=data["conceptrecid"]
+        )
+        # FIXME: Assuming its a version() call
+        # Not nice here (use PIDRelations)
         data.pop('recid')
 
     recid = recid_minter_v2(record_uuid, data)
+
+    PIDNodeVersioning(pid=conceptrecid).insert_draft_child(child_pid=recid)
 
     return recid
