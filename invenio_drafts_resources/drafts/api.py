@@ -18,17 +18,11 @@ class DraftBase(Record):
     # WHY: We want to force the model_cls to be specified by the user
     # No default one is given, only the base.
     model_cls = None
-    default_status = 'draft'
 
     @property
     def expiry_date(self):
         """Get model identifier."""
         return self.model.expiry_date if self.model else None
-
-    @property
-    def status(self):
-        """Get revision identifier."""
-        return self.model.status if self.model else self.default_status
 
     @property
     def fork_id(self):
@@ -47,7 +41,6 @@ class DraftBase(Record):
                 id=id_,
                 fork_version_id=fork_version_id,
                 expiry_date=draft.expiry_date,
-                status=draft.status,
                 json=draft,
             )
 
