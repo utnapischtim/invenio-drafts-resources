@@ -251,7 +251,7 @@ class RecordDraftService(RecordService):
 
         return self.resource_unit(pid=pid, record=record)
 
-    def version(self, id_, identity):
+    def new_version(self, id_, identity):
         """Create a new version of a record."""
         self.require_permission(identity, "create")
         # Get draft
