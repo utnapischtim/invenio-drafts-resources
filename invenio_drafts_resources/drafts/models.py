@@ -24,9 +24,6 @@ class DraftMetadataBase(Timestamp):
     properties that are automatically updated.
     """
 
-    # Enables SQLAlchemy-Continuum versioning
-    __versioned__ = {}
-
     id = db.Column(
         UUIDType,
         primary_key=True,
@@ -66,7 +63,3 @@ class DraftMetadataBase(Timestamp):
     `NULL`. Default value is an empty dict. `NULL` value means that the
     record metadata has been deleted.
     """
-
-    __mapper_args__ = {
-        'version_id_col': version_id
-    }
