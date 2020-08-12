@@ -31,6 +31,8 @@ from invenio_drafts_resources.resources import DraftActionResource, \
     DraftResource, DraftVersionResource
 from invenio_drafts_resources.services import RecordDraftService, \
     RecordDraftServiceConfig
+from invenio_drafts_resources.services.pid_manager import PIDManager, \
+    PIDManagerConfig
 
 
 class AnyUserPermissionPolicy(RecordPermissionPolicy):
@@ -87,6 +89,13 @@ class CustomRecordServiceConfig(RecordServiceConfig):
     permission_policy_cls = AnyUserPermissionPolicy
 
 
+class CustomPIDManagerConfig(PIDManagerConfig):
+    """Custom pid manager config."""
+
+    draft_cls = CustomDraft
+    record_cls = CustomRecord
+
+
 class CustomRecordDraftServiceConfig(RecordDraftServiceConfig):
     """Custom draft service config."""
 
@@ -94,6 +103,7 @@ class CustomRecordDraftServiceConfig(RecordDraftServiceConfig):
     record_cls = CustomRecord
     search_cls = TestSearch
     permission_policy_cls = AnyUserPermissionPolicy
+    pid_manager = PIDManager(config=CustomPIDManagerConfig)
 
 
 @pytest.fixture(scope='module')

@@ -97,8 +97,8 @@ def test_create_publish_record_new_revision(app, draft_service, input_record,
 
     recid = identified_record.id
 
-    # Allow ES to clean deleted documents. Flush is not the same.
-    # Default collection time is 1 minute.
+    # FIXME: Allow ES to clean deleted documents.
+    # Flush is not the same. Default collection time is 1 minute.
     time.sleep(70)
 
     # Create new draft of said record

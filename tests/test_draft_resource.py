@@ -9,6 +9,7 @@
 """Invenio Drafts Resources module to create REST APIs"""
 
 import json
+import time
 
 import pytest
 from sqlalchemy.orm.exc import NoResultFound
@@ -20,13 +21,8 @@ from invenio_drafts_resources.resources import DraftActionResource, \
 HEADERS = {"content-type": "application/json", "accept": "application/json"}
 
 
-def test_create_draft_of_new_record(client, input_draft):
-    """Test draft creation of a non-existing record."""
-    response = client.post(
-        "/records", data=json.dumps(input_draft), headers=HEADERS
-    )
-
-    assert response.status_code == 201
+def _assert_single_item_response(response):
+    """Assert the fields present on a single item response."""
     response_fields = response.json.keys()
     fields_to_check = ['pid', 'metadata', 'revision',
                        'created', 'updated', 'links']
@@ -35,61 +31,8 @@ def test_create_draft_of_new_record(client, input_draft):
         assert field in response_fields
 
 
-def test_create_draft_of_existing_record(client, record_service,
-                                         input_record, fake_identity):
-    """Test draft creation of an existing record."""
-    # Create new record manually since the endpoint it overwritten
-    identified_record = record_service.create(
-        data=input_record, identity=fake_identity
-    )
-
-    recid = identified_record.id
-    assert recid
-
-    for key, value in input_record.items():
-        assert identified_record.record[key] == value
-
-    # Create new draft of said record
-    orig_title = input_record['title']
-    input_record['title'] = "Edited title"
-    response = client.post(
-        "/records/{}/draft".format(recid),
-        data=json.dumps(input_record),
-        headers=HEADERS
-    )
-
-    assert response.status_code == 201
-    response_fields = response.json.keys()
-    fields_to_check = ['pid', 'metadata', 'revision',
-                       'created', 'updated', 'links']
-
-    for field in fields_to_check:
-        assert field in response_fields
-
-    assert response.json['metadata']['title'] == input_record['title']
-
-    # Check the actual record was not modified
-    response = client.get(
-        "/records/{}".format(recid),
-        headers=HEADERS
-    )
-
-    assert response.status_code == 200
-    response_fields = response.json.keys()
-    fields_to_check = ['pid', 'metadata', 'revision',
-                       'created', 'updated', 'links']
-
-    for field in fields_to_check:
-        assert field in response_fields
-
-    assert response.json['metadata']['title'] == orig_title
-
-
-def test_publish_draft_of_new_record(client, input_record):
-    """Test draft publication of a non-existing record.
-
-    It has to first create said draft.
-    """
+def _create_and_publish(client, input_record):
+    """Create a draft and publish it."""
     # Create the draft
     response = client.post(
         "/records", data=json.dumps(input_record), headers=HEADERS
@@ -104,12 +47,27 @@ def test_publish_draft_of_new_record(client, input_record):
     )
 
     assert response.status_code == 202
-    response_fields = response.json.keys()
-    fields_to_check = ['pid', 'metadata', 'revision',
-                       'created', 'updated', 'links']
+    _assert_single_item_response(response)
 
-    for field in fields_to_check:
-        assert field in response_fields
+    return recid
+
+
+def test_create_new_record_draft(client, input_draft):
+    """Test draft creation of a non-existing record."""
+    response = client.post(
+        "/records", data=json.dumps(input_draft), headers=HEADERS
+    )
+
+    assert response.status_code == 201
+    _assert_single_item_response(response)
+
+
+def test_create_publish_new_record_draft(client, input_record):
+    """Test draft publication of a non-existing record.
+
+    It has to first create said draft.
+    """
+    recid = _create_and_publish(client, input_record)
 
     # Check draft deletion
     # TODO: Remove import when exception is properly handled
@@ -125,9 +83,88 @@ def test_publish_draft_of_new_record(client, input_record):
 
     assert response.status_code == 200
 
-    response_fields = response.json.keys()
-    fields_to_check = ['pid', 'metadata', 'revision',
-                       'created', 'updated', 'links']
+    _assert_single_item_response(response)
 
-    for field in fields_to_check:
-        assert field in response_fields
+
+def test_create_publish_record_new_revision(client, input_record,
+                                            fake_identity):
+    """Test draft creation of an existing record and publish it."""
+    recid = _create_and_publish(client, input_record)
+
+    # FIXME: Allow ES to clean deleted documents.
+    # Flush is not the same. Default collection time is 1 minute.
+    time.sleep(70)
+
+    # Create new draft of said record
+    orig_title = input_record['title']
+    input_record['title'] = "Edited title"
+    response = client.post(
+        "/records/{}/draft".format(recid),
+        data=json.dumps(input_record),
+        headers=HEADERS
+    )
+
+    assert response.status_code == 201
+    _assert_single_item_response(response)
+    assert response.json['metadata']['title'] == input_record['title']
+    assert response.json['revision'] == 0
+
+    # Check the actual record was not modified
+    response = client.get(
+        "/records/{}".format(recid),
+        headers=HEADERS
+    )
+
+    assert response.status_code == 200
+    _assert_single_item_response(response)
+    assert response.json['metadata']['title'] == orig_title
+
+    # Publish it to check the increment in reversion
+    response = client.post(
+        "/records/{}/draft/actions/publish".format(recid), headers=HEADERS
+    )
+
+    assert response.status_code == 202
+    _assert_single_item_response(response)
+
+    assert response.json['metadata']['recid'] == recid
+    assert response.json['revision'] == 1
+    assert response.json['metadata']['title'] == input_record['title']
+
+    # Check it was actually edited
+    response = client.get(
+        "/records/{}".format(recid),
+        headers=HEADERS
+    )
+    assert response.json['metadata']['title'] == input_record['title']
+
+
+def test_create_publish_record_new_version(client, input_record,
+                                           fake_identity):
+    """Creates a new version of a record.
+
+    Publishes the draft to obtain 2 versions of a record.
+    """
+    recid = _create_and_publish(client, input_record)
+
+    # Create new draft of said record
+    response = client.post(
+        "/records/{}/versions".format(recid),
+        headers=HEADERS
+    )
+
+    assert response.status_code == 201
+    _assert_single_item_response(response)
+    assert response.json['revision'] == 0
+    recid_2 = response.json['metadata']['recid']
+
+    # Publish it to check the increment in reversion
+    response = client.post(
+        "/records/{}/draft/actions/publish".format(recid_2), headers=HEADERS
+    )
+
+    assert response.status_code == 202
+    _assert_single_item_response(response)
+
+    assert response.json['metadata']['recid'] == recid_2 != recid
+    assert response.json['revision'] == 0

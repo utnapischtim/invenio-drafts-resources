@@ -13,14 +13,11 @@
 import uuid
 
 from invenio_db import db
-from invenio_pidrelations.contrib.versioning import PIDNodeVersioning
-from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_resources.services import MarshmallowDataValidator, \
     RecordService, RecordServiceConfig
 
-from ..resource_unit import IdentifiedRecordDraft
-from .minter import versioned_recid_minter_v2
 from .permissions import DraftPermissionPolicy
+from .pid_manager import PIDManager
 from .schemas import DraftMetadataSchemaJSONV1
 from .search import draft_record_to_index
 
@@ -30,7 +27,7 @@ class RecordDraftServiceConfig(RecordServiceConfig):
 
     # Service configuration
     permission_policy_cls = DraftPermissionPolicy
-    resource_unit_cls = IdentifiedRecordDraft
+    pid_manager = PIDManager()
 
     # DraftService configuration.
     record_to_index = draft_record_to_index
@@ -49,21 +46,10 @@ class RecordDraftService(RecordService):
 
     default_config = RecordDraftServiceConfig
 
-    # Overwrite resolver because default status is a class attr
     @property
-    def resolver(self):
-        """Factory for creating a draft resolver instance."""
-        return self.config.resolver_cls(
-            pid_type=self.config.resolver_pid_type,
-            getter=self.record_cls.get_record,
-            registered_only=False
-        )
-
-    # Overwrite minter to use versioning
-    @property
-    def minter(self):
-        """Returns the minter function."""
-        return versioned_recid_minter_v2
+    def pid_manager(self):
+        """Factory for the pid manager."""
+        return self.config.pid_manager
 
     @property
     def indexer(self):
@@ -83,47 +69,20 @@ class RecordDraftService(RecordService):
         """Returns an instance of the draft data validator."""
         return self.config.draft_data_validator
 
-    @property
-    def draft_resolver(self):
-        """Factory for creating a draft resolver instance."""
-        return self.config.resolver_cls(
-            pid_type=self.config.resolver_pid_type,
-            getter=self.draft_cls.get_record,
-            registered_only=False
-        )
-
-    def resolve_draft(self, id_):
-        """Resolve a persistent identifier to a record draft."""
-        return self.draft_resolver.resolve(id_)
-
-    # FIXME: This should be moved to the PID wrapper when it is done.
-    def _fetch_pid_db(self, pid_value):
-        """Fetch a PID from DB."""
-        return PersistentIdentifier.get(
-            pid_type=self.config.resolver_pid_type,
-            pid_value=pid_value
-        )
-
-    # FIXME: This should be moved to the PID wrapper when it is done.
-    def _register_pid(self, pid_value):
-        """Register the conceptrecid."""
-        pid = self._fetch_pid_db(pid_value)
-        pid.register()
-
     # High-level API
     # Inherits record read, search, create, delete and update
 
     def read_draft(self, id_, identity):
         """Retrieve a record."""
-        pid, record = self.resolve_draft(id_)
-        self.require_permission(identity, "read", record=record)
+        pid, draft = self.pid_manager.resolve(id_, draft=True)
+        self.require_permission(identity, "read", record=draft)
         # Todo: how do we deal with tombstone pages
-        return self.resource_unit(pid=pid, record=record, links=None)
+        return self.resource_unit(pid=pid, record=draft, links=None)
 
     def update_draft(self, id_, data, identity):
         """Replace a record."""
         # TODO: etag and versioning
-        pid, draft = self.resolve_draft(id_)
+        pid, draft = self.pid_manager.resolve(id_, draft=True)
         # Permissions
         self.require_permission(identity, "update", record=draft)
         validated_data = self.draft_data_validator.validate(data)
@@ -145,7 +104,7 @@ class RecordDraftService(RecordService):
         self.require_permission(identity, "create")
         validated_data = self.draft_data_validator.validate(data)
         rec_uuid = uuid.uuid4()
-        pid = self.minter(record_uuid=rec_uuid, data=validated_data)
+        pid = self.pid_manager.mint(record_uuid=rec_uuid, data=validated_data)
         draft = self.draft_cls.create(validated_data, id_=rec_uuid)
 
         db.session.commit()  # Persist DB
@@ -165,7 +124,7 @@ class RecordDraftService(RecordService):
 
         :param id_: record PID value.
         """
-        pid, record = self.resolve(id_)
+        pid, record = self.pid_manager.resolve(id_)
         self.require_permission(identity, "create")
         validated_data = self.draft_data_validator.validate(data)
         self._patch_data(record, validated_data)
@@ -179,7 +138,7 @@ class RecordDraftService(RecordService):
 
     def _publish_revision(self, validated_data, pid):
         """Publish draft of existing record (edition)."""
-        pid, record = self.resolve(pid.pid_value)
+        pid, record = self.pid_manager.resolve(pid.pid_value)
         record.clear()
         record.update(validated_data)
         record.commit()
@@ -189,35 +148,27 @@ class RecordDraftService(RecordService):
     def _publish_new_version(self, validated_data, draft):
         """Publish draft of a new record."""
         record = self.record_cls.create(validated_data, id_=draft.id)
+        conceptrecid = record['conceptrecid']
 
-        conceptrecid = self._fetch_pid_db(validated_data["conceptrecid"])
-        pv = PIDNodeVersioning(pid=conceptrecid)
-        if pv.children.count() > 0:  # Is first version
-            self._register_pid(record['conceptrecid'])
-        self._register_pid(record['recid'])
+        # FIXME: This implies two db queries for the same in pid_manager
+        if self.pid_manager.is_first_version(
+            pid_value=conceptrecid
+        ):
+            self.pid_manager.register_pid(record['conceptrecid'])
+
+        self.pid_manager.register_pid(record['recid'])
 
         return record
-
-    def _is_published(self, pid):
-        """FIXME: Should be refactored.
-
-        Maybe `IdentifiedRecord` could hold it along with:
-            - `fetch_parent_pid` (should be part of pids?)
-            - Should pids be a dict (know which is the parent, the doi, etc.)
-        Resolver might simply return a resource unit.
-        Upon publishing it can "replace" the draft by record.
-        """
-        return pid.status == PIDStatus.REGISTERED
 
     def publish(self, id_, identity):
         """Publish a draft."""
         self.require_permission(identity, "publish")
         # Get draft
-        pid, draft = self.resolve_draft(id_=id_)
+        pid, draft = self.pid_manager.resolve(id_, draft=True)
         # Validate against record schema
         validated_data = self.data_validator.validate(draft.dumps())
         # Publish it
-        if self._is_published(pid):  # Then we publish a revision
+        if self.pid_manager.is_published(pid):  # Then we publish a revision
             record = self._publish_revision(validated_data, pid)
         else:
             record = self._publish_new_version(validated_data, draft)
@@ -234,15 +185,18 @@ class RecordDraftService(RecordService):
     def new_version(self, id_, identity):
         """Create a new version of a record."""
         self.require_permission(identity, "create")
-        # Get draft
-        pid, record = self.resolve(id_=id_)
+        # Get record
+        pid, record = self.pid_manager.resolve(id_)
         # Validate and create a draft, register PID
         data = record.dumps()
         # Validate against record schema
         validated_data = self.draft_data_validator.validate(data)
         # Create new record (relation done by minter)
         rec_uuid = uuid.uuid4()
-        pid = self.minter(record_uuid=rec_uuid, data=validated_data)
+        pid = self.pid_manager.mint(
+            record_uuid=rec_uuid,
+            data=validated_data
+        )
         draft = self.draft_cls.create(
             data=validated_data,
             id_=rec_uuid

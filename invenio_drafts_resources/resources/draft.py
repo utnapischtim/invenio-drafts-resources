@@ -72,6 +72,11 @@ class DraftVersionResourceConfig(ResourceConfig):
     """Draft resource config."""
 
     list_route = "/records/<pid_value>/versions"
+    response_handlers = {
+        "application/json": RecordResponse(
+            RecordDraftJSONSerializer(schema=DraftSchemaJSONV1)
+        )
+    }
 
 
 class DraftVersionResource(CollectionResource):
