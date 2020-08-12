@@ -14,11 +14,11 @@ import uuid
 
 from invenio_db import db
 from invenio_pidrelations.contrib.versioning import PIDNodeVersioning
-from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_resources.services import MarshmallowDataValidator, \
     RecordService, RecordServiceConfig
 
-from ..resource_units import IdentifiedRecordDraft
+from ..resource_unit import IdentifiedRecordDraft
 from .minter import versioned_recid_minter_v2
 from .permissions import DraftPermissionPolicy
 from .schemas import DraftMetadataSchemaJSONV1
@@ -30,8 +30,6 @@ class RecordDraftServiceConfig(RecordServiceConfig):
 
     # Service configuration
     permission_policy_cls = DraftPermissionPolicy
-
-    # RecordService configuration
     resource_unit_cls = IdentifiedRecordDraft
 
     # DraftService configuration.
@@ -120,7 +118,7 @@ class RecordDraftService(RecordService):
         pid, record = self.resolve_draft(id_)
         self.require_permission(identity, "read", record=record)
         # Todo: how do we deal with tombstone pages
-        return self.resource_unit(pid=pid, record=record)
+        return self.resource_unit(pid=pid, record=record, links=None)
 
     def update_draft(self, id_, data, identity):
         """Replace a record."""
@@ -128,8 +126,6 @@ class RecordDraftService(RecordService):
         pid, draft = self.resolve_draft(id_)
         # Permissions
         self.require_permission(identity, "update", record=draft)
-        # TODO: Data validation
-
         validated_data = self.draft_data_validator.validate(data)
         # FIXME: extract somewhere else
         self._patch_data(draft, validated_data)
@@ -139,7 +135,7 @@ class RecordDraftService(RecordService):
         if self.indexer:
             self.indexer.index(draft)
 
-        return self.resource_unit(pid=pid, record=draft)
+        return self.resource_unit(pid=pid, record=draft, links=None)
 
     def create(self, data, identity):
         """Create a draft for a new record.
@@ -156,10 +152,11 @@ class RecordDraftService(RecordService):
         if self.indexer:
             self.indexer.index(draft)
 
-        return self.config.resource_unit_cls(pid=pid, record=draft)
+        return self.resource_unit(pid=pid, record=draft, links=None)
 
     def _patch_data(self, record, data):
         """Temporarily here until the merge strategy is set."""
+        # TODO: Implement better update/merge strategy
         for key in data.keys():
             record[key] = data[key]
 
@@ -168,11 +165,9 @@ class RecordDraftService(RecordService):
 
         :param id_: record PID value.
         """
-        # FIXME: for now it assumes always new revision (no files changes)
         pid, record = self.resolve(id_)
         self.require_permission(identity, "create")
         validated_data = self.draft_data_validator.validate(data)
-        # FIXME: extract somewhere else
         self._patch_data(record, validated_data)
         draft = self.draft_cls.create(record.dumps(), id_=record.id,
                                       fork_version_id=record.revision_id)
@@ -180,23 +175,10 @@ class RecordDraftService(RecordService):
         if self.indexer:
             self.indexer.index(draft)
 
-        return self.config.resource_unit_cls(pid=pid, record=draft)
+        return self.resource_unit(pid=pid, record=draft, links=None)
 
-    def _publish_new_record(self, validated_data, draft):
-        """Publish draft of a new record."""
-        # Use same UUID
-        record = self.record_cls.create(validated_data, id_=draft.id)
-        self._register_pid(record['conceptrecid'])
-        self._register_pid(record['recid'])
-
-        return record
-
-    def _publish_edited(self, validated_data, pid):
-        """Publish draft of existing record (new version or revision).
-
-        NOTE: For now it only contemplates revision since files cannot
-        be edited (not supported).
-        """
+    def _publish_revision(self, validated_data, pid):
+        """Publish draft of existing record (edition)."""
         pid, record = self.resolve(pid.pid_value)
         record.clear()
         record.update(validated_data)
@@ -206,41 +188,39 @@ class RecordDraftService(RecordService):
 
     def _publish_new_version(self, validated_data, draft):
         """Publish draft of a new record."""
-        # FIXME: This should be refactored, too much similarities with
-        # `_publish_new_record`.
-        # Use same UUID
         record = self.record_cls.create(validated_data, id_=draft.id)
+
+        conceptrecid = self._fetch_pid_db(validated_data["conceptrecid"])
+        pv = PIDNodeVersioning(pid=conceptrecid)
+        if pv.children.count() > 0:  # Is first version
+            self._register_pid(record['conceptrecid'])
         self._register_pid(record['recid'])
 
         return record
 
-    def _is_new_version(self, data, draft):
-        """Checks if the publishing should be a new version or revision."""
-        # NOTE: Until files is implemented we use a metadata field "_files"
-        return data.get("_files", False)
+    def _is_published(self, pid):
+        """FIXME: Should be refactored.
+
+        Maybe `IdentifiedRecord` could hold it along with:
+            - `fetch_parent_pid` (should be part of pids?)
+            - Should pids be a dict (know which is the parent, the doi, etc.)
+        Resolver might simply return a resource unit.
+        Upon publishing it can "replace" the draft by record.
+        """
+        return pid.status == PIDStatus.REGISTERED
 
     def publish(self, id_, identity):
         """Publish a draft."""
         self.require_permission(identity, "publish")
         # Get draft
         pid, draft = self.resolve_draft(id_=id_)
-        # Validate and create record, register PID
-        data = draft.dumps()
         # Validate against record schema
-        validated_data = self.data_validator.validate(data)
+        validated_data = self.data_validator.validate(draft.dumps())
         # Publish it
-        conceptrecid = self._fetch_pid_db(validated_data["conceptrecid"])
-        pv = PIDNodeVersioning(pid=conceptrecid)
-        # children return only registered pids
-        is_new_record = pv.children.count() > 0
-        if not is_new_record:
-            record = self._publish_new_record(validated_data, draft)
+        if self._is_published(pid):  # Then we publish a revision
+            record = self._publish_revision(validated_data, pid)
         else:
-            if self._is_new_version(validated_data, draft):
-                record = self._publish_new_version(validated_data, draft)
-            else:
-                record = self._publish_edited(validated_data, pid)
-
+            record = self._publish_new_version(validated_data, draft)
         # Remove draft
         draft.delete(force=True)
         db.session.commit()  # Persist DB
@@ -249,7 +229,7 @@ class RecordDraftService(RecordService):
             self.indexer.delete(draft)
             self.indexer.index(record)
 
-        return self.resource_unit(pid=pid, record=record)
+        return self.resource_unit(pid=pid, record=record, links=None)
 
     def new_version(self, id_, identity):
         """Create a new version of a record."""
@@ -272,4 +252,4 @@ class RecordDraftService(RecordService):
         if self.indexer:
             self.indexer.index(draft)
 
-        return self.resource_unit(pid=pid, record=draft)
+        return self.resource_unit(pid=pid, record=draft, links=None)

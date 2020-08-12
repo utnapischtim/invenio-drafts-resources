@@ -20,9 +20,9 @@ class DraftBase(Record):
     model_cls = None
 
     @property
-    def expiry_date(self):
+    def expires_at(self):
         """Get model identifier."""
-        return self.model.expiry_date if self.model else None
+        return self.model.expires_at if self.model else None
 
     @property
     def fork_id(self):
@@ -40,7 +40,7 @@ class DraftBase(Record):
             draft.model = cls.model_cls(
                 id=id_,
                 fork_version_id=fork_version_id,
-                expiry_date=draft.expiry_date,
+                expires_at=draft.expires_at,
                 json=draft,
             )
 

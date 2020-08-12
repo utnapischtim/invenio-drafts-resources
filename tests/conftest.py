@@ -192,7 +192,6 @@ def input_record():
         "_access": {"metadata_restricted": False, "files_restricted": False},
         "_owners": [1],
         "_created_by": 1,
-        "_files": False,
         "title": "A Romans story",
         "description": "A looong description full of lorem ipsums"
     }

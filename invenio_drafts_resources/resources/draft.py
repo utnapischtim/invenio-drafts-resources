@@ -15,9 +15,8 @@ from flask_resources.context import resource_requestctx
 from flask_resources.resources import ResourceConfig
 from invenio_records_resources.responses import RecordResponse
 from invenio_records_resources.schemas import RecordSchemaJSONV1
-from invenio_records_resources.serializers import RecordJSONSerializer
 
-from ..serializers import DraftJSONSerializer
+from ..serializers import RecordDraftJSONSerializer
 from ..services import DraftVersionService, RecordDraftService
 from ..services.schemas import DraftSchemaJSONV1
 
@@ -28,7 +27,7 @@ class DraftResourceConfig(ResourceConfig):
     list_route = "/records/<pid_value>/draft"
     response_handlers = {
         "application/json": RecordResponse(
-            DraftJSONSerializer(schema=DraftSchemaJSONV1)
+            RecordDraftJSONSerializer(schema=DraftSchemaJSONV1)
         )
     }
 
@@ -104,7 +103,7 @@ class DraftActionResourceConfig(ResourceConfig):
     list_route = "/records/<pid_value>/draft/actions/<action>"
     response_handlers = {
         "application/json": RecordResponse(
-            RecordJSONSerializer(schema=RecordSchemaJSONV1)
+            RecordDraftJSONSerializer(schema=RecordSchemaJSONV1)
         )
     }
 
@@ -121,6 +120,7 @@ class DraftActionResource(SingletonResource):
 
     def create(self, *args, **kwargs):
         """Any POST business logic."""
+        # FIXME: Implement as CMD patter loaded from config
         if resource_requestctx.route["action"] == "publish":
             identity = g.identity
             id_ = resource_requestctx.route["pid_value"]
