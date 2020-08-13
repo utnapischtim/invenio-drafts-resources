@@ -14,11 +14,10 @@ from flask_resources import CollectionResource, SingletonResource
 from flask_resources.context import resource_requestctx
 from flask_resources.resources import ResourceConfig
 from invenio_records_resources.responses import RecordResponse
-from invenio_records_resources.schemas import RecordSchemaJSONV1
 
 from ..serializers import RecordDraftJSONSerializer
 from ..services import DraftVersionService, RecordDraftService
-from ..services.schemas import DraftSchemaJSONV1
+from ..services.schemas import RecordDraftSchemaJSONV1
 
 
 class DraftResourceConfig(ResourceConfig):
@@ -27,7 +26,7 @@ class DraftResourceConfig(ResourceConfig):
     list_route = "/records/<pid_value>/draft"
     response_handlers = {
         "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=DraftSchemaJSONV1)
+            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
         )
     }
 
@@ -74,7 +73,7 @@ class DraftVersionResourceConfig(ResourceConfig):
     list_route = "/records/<pid_value>/versions"
     response_handlers = {
         "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=DraftSchemaJSONV1)
+            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
         )
     }
 
@@ -108,7 +107,7 @@ class DraftActionResourceConfig(ResourceConfig):
     list_route = "/records/<pid_value>/draft/actions/<action>"
     response_handlers = {
         "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=RecordSchemaJSONV1)
+            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
         )
     }
 

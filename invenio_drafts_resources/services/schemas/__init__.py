@@ -9,6 +9,6 @@
 
 """High-level API for wokring with drafts."""
 
-from .json import DraftMetadataSchemaJSONV1, DraftSchemaJSONV1
+from .json import RecordDraftSchemaJSONV1
 
-__all__ = ("DraftMetadataSchemaJSONV1", "DraftSchemaJSONV1")
+__all__ = ("RecordDraftSchemaJSONV1")

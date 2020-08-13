@@ -33,7 +33,7 @@ RecordIdProviderV2.default_status_with_obj = PIDStatus.RESERVED
 
 
 def versioned_recid_minter_v2(record_uuid, data):
-    """Rserve the Concept RECID and create the RECID."""
+    """Reserve the Concept RECID and create the RECID."""
     if 'conceptrecid' not in data:
         conceptrecid = conceptrecid_minter_v2(data=data)
     else:

@@ -9,31 +9,16 @@
 """Marshmallow JSON schema."""
 
 
+from invenio_records_resources.schemas import RecordSchemaJSONV1
 from invenio_records_resources.schemas.fields import SanitizedUnicode
-from marshmallow import INCLUDE, Schema, fields
+from marshmallow import fields
 
 
-class DraftMetadataSchemaJSONV1(Schema):
-    """Basic metadata schema class."""
-
-    class Meta:
-        """Meta class to accept unknwon fields."""
-
-        unknown = INCLUDE
-
-    _created_by = fields.Integer(required=True)
-
-
-class DraftSchemaJSONV1(Schema):
+class RecordDraftSchemaJSONV1(RecordSchemaJSONV1):
     """Schema for drafts v1 in JSON."""
 
-    id = fields.String(attribute="pid.pid_value")
     conceptrecid = SanitizedUnicode(
         attribute='metadata.conceptrecid',
         dump_only=True
     )
-    metadata = fields.Nested(DraftMetadataSchemaJSONV1)
-    links = fields.Raw()
-    created = fields.Str()
-    updated = fields.Str()
     expires_at = fields.Str()

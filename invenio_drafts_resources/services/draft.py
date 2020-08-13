@@ -18,7 +18,6 @@ from invenio_records_resources.services import MarshmallowDataValidator, \
 
 from .permissions import DraftPermissionPolicy
 from .pid_manager import PIDManager
-from .schemas import DraftMetadataSchemaJSONV1
 from .search import draft_record_to_index
 
 
@@ -27,15 +26,14 @@ class RecordDraftServiceConfig(RecordServiceConfig):
 
     # Service configuration
     permission_policy_cls = DraftPermissionPolicy
+
+    # RecordService configuration
     pid_manager = PIDManager()
 
     # DraftService configuration.
     record_to_index = draft_record_to_index
     # WHY: We want to force user input choice here.
     draft_cls = None
-    draft_data_validator = MarshmallowDataValidator(
-        schema=DraftMetadataSchemaJSONV1
-    )
 
 
 class RecordDraftService(RecordService):
@@ -64,11 +62,6 @@ class RecordDraftService(RecordService):
         """Factory for creating a record class."""
         return self.config.draft_cls
 
-    @property
-    def draft_data_validator(self):
-        """Returns an instance of the draft data validator."""
-        return self.config.draft_data_validator
-
     # High-level API
     # Inherits record read, search, create, delete and update
 
@@ -85,7 +78,7 @@ class RecordDraftService(RecordService):
         pid, draft = self.pid_manager.resolve(id_, draft=True)
         # Permissions
         self.require_permission(identity, "update", record=draft)
-        validated_data = self.draft_data_validator.validate(data)
+        validated_data = self.data_validator.validate(data, partial=True)
         # FIXME: extract somewhere else
         self._patch_data(draft, validated_data)
         draft.update(draft.dumps())
@@ -102,7 +95,7 @@ class RecordDraftService(RecordService):
         It does not eagerly create the associated record.
         """
         self.require_permission(identity, "create")
-        validated_data = self.draft_data_validator.validate(data)
+        validated_data = self.data_validator.validate(data, partial=True)
         rec_uuid = uuid.uuid4()
         pid = self.pid_manager.mint(record_uuid=rec_uuid, data=validated_data)
         draft = self.draft_cls.create(validated_data, id_=rec_uuid)
@@ -126,7 +119,7 @@ class RecordDraftService(RecordService):
         """
         pid, record = self.pid_manager.resolve(id_)
         self.require_permission(identity, "create")
-        validated_data = self.draft_data_validator.validate(data)
+        validated_data = self.data_validator.validate(data, partial=True)
         self._patch_data(record, validated_data)
         draft = self.draft_cls.create(record.dumps(), id_=record.id,
                                       fork_version_id=record.revision_id)
@@ -190,7 +183,7 @@ class RecordDraftService(RecordService):
         # Validate and create a draft, register PID
         data = record.dumps()
         # Validate against record schema
-        validated_data = self.draft_data_validator.validate(data)
+        validated_data = self.data_validator.validate(data, partial=True)
         # Create new record (relation done by minter)
         rec_uuid = uuid.uuid4()
         pid = self.pid_manager.mint(
