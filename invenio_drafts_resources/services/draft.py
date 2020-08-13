@@ -180,18 +180,15 @@ class RecordDraftService(RecordService):
         self.require_permission(identity, "create")
         # Get record
         pid, record = self.pid_manager.resolve(id_)
-        # Validate and create a draft, register PID
         data = record.dumps()
-        # Validate against record schema
-        validated_data = self.data_validator.validate(data, partial=True)
         # Create new record (relation done by minter)
         rec_uuid = uuid.uuid4()
         pid = self.pid_manager.mint(
             record_uuid=rec_uuid,
-            data=validated_data
+            data=data
         )
         draft = self.draft_cls.create(
-            data=validated_data,
+            data=data,
             id_=rec_uuid
         )
         db.session.commit()  # Persist DB
