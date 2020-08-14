@@ -14,13 +14,14 @@ import pytz
 from flask_resources.serializers import SerializerMixin
 from invenio_records_resources.serializers import RecordJSONSerializer
 
+from .services.schemas import RecordDraftSchemaJSONV1
 
 class RecordDraftJSONSerializer(RecordJSONSerializer):
     """Drafts JSON serializer implementation."""
 
     def __init__(self, schema=None):
         """Constructor."""
-        self.schema = schema
+        self.schema = RecordDraftSchemaJSONV1
 
     def _process_draft(self, record_unit, *args, **kwargs):
         record_draft_dict = \

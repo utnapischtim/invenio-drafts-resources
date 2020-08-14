@@ -17,7 +17,6 @@ from invenio_records_resources.responses import RecordResponse
 
 from ..serializers import RecordDraftJSONSerializer
 from ..services import DraftVersionService, RecordDraftService
-from ..services.schemas import RecordDraftSchemaJSONV1
 
 
 class DraftResourceConfig(ResourceConfig):
@@ -25,9 +24,7 @@ class DraftResourceConfig(ResourceConfig):
 
     list_route = "/records/<pid_value>/draft"
     response_handlers = {
-        "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
-        )
+        "application/json": RecordResponse(RecordDraftJSONSerializer())
     }
 
 
@@ -72,9 +69,7 @@ class DraftVersionResourceConfig(ResourceConfig):
 
     list_route = "/records/<pid_value>/versions"
     response_handlers = {
-        "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
-        )
+        "application/json": RecordResponse(RecordDraftJSONSerializer())
     }
 
 
@@ -106,9 +101,7 @@ class DraftActionResourceConfig(ResourceConfig):
 
     list_route = "/records/<pid_value>/draft/actions/<action>"
     response_handlers = {
-        "application/json": RecordResponse(
-            RecordDraftJSONSerializer(schema=RecordDraftSchemaJSONV1)
-        )
+        "application/json": RecordResponse(RecordDraftJSONSerializer())
     }
 
 
