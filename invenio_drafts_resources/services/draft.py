@@ -39,7 +39,7 @@ class RecordDraftServiceConfig(RecordServiceConfig):
 class RecordDraftService(RecordService):
     """Draft Service interface.
 
-    This service includes verioning.
+    This service includes versioning.
     """
 
     default_config = RecordDraftServiceConfig

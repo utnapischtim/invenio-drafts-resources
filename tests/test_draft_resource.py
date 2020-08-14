@@ -158,7 +158,7 @@ def test_create_publish_record_new_version(client, input_record,
     assert response.json['revision'] == 0
     recid_2 = response.json['metadata']['recid']
 
-    # Publish it to check the increment in reversion
+    # Publish it to check the increment in version
     response = client.post(
         "/records/{}/draft/actions/publish".format(recid_2), headers=HEADERS
     )
