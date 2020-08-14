@@ -16,6 +16,7 @@ from invenio_records_resources.serializers import RecordJSONSerializer
 
 from .services.schemas import RecordDraftSchemaJSONV1
 
+
 class RecordDraftJSONSerializer(RecordJSONSerializer):
     """Drafts JSON serializer implementation."""
 
@@ -23,17 +24,18 @@ class RecordDraftJSONSerializer(RecordJSONSerializer):
         """Constructor."""
         self.schema = RecordDraftSchemaJSONV1
 
-    def _process_draft(self, record_unit, *args, **kwargs):
+    def _process_record(self, record_unit, *args, **kwargs):
         record_draft_dict = \
-            super(RecordDraftJSONSerializer, self)._process_draft(
+            super(RecordDraftJSONSerializer, self)._process_record(
                 record_unit, *args, **kwargs
             )
 
-        if draft_unit.record.expires_at:
+        if hasattr(record_unit.record, 'expires_at'):
+            expires_at = record_unit.record.expires_at
             record_draft_dict["expires_at"] = (
-                pytz.utc.localize(draft.expires_at).isoformat()
-                if draft.expires_at and not draft.expires_at.tzinfo
+                pytz.utc.localize(expires_at).isoformat()
+                if expires_at and not expires_at.tzinfo
                 else None
             )
 
-        return draft_dict
+        return record_draft_dict
