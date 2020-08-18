@@ -9,6 +9,10 @@
 Changes
 =======
 
-Version 0.2.1 (released TBD)
+Version 0.2.2 (2020-08-19)
+
+- Fix support for Elasticsearch 6 and 7
+
+Version 0.2.1 (2020-08-18)
 
 - Initial public release.
