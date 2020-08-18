@@ -13,7 +13,6 @@ from .draft import RecordDraftService, RecordDraftServiceConfig
 from .draft_file import DraftFileService, DraftFileServiceConfig
 from .draft_file_metadata import DraftFileMetadataService, \
     DraftFileMetadataServiceConfig
-from .draft_version import DraftVersionService, DraftVersionServiceConfig
 
 __all__ = (
     "DraftFileMetadataService",
@@ -22,6 +21,4 @@ __all__ = (
     "DraftFileServiceConfig",
     "RecordDraftService",
     "RecordDraftServiceConfig",
-    "DraftVersionService",
-    "DraftVersionServiceConfig"
 )
