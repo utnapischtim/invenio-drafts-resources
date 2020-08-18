@@ -18,8 +18,6 @@ from invenio_records_resources.services import MarshmallowDataValidator, \
 
 from ..links import DraftPublishLinkBuilder, DraftSelfHtmlLinkBuilder, \
     DraftSelfLinkBuilder, RecordEditLinkBuilder
-from ..resources.draft_config import DraftActionResourceConfig, \
-    DraftResourceConfig
 from .permissions import DraftPermissionPolicy
 from .pid_manager import PIDManager
 from .search import draft_record_to_index
@@ -41,8 +39,8 @@ class RecordDraftServiceConfig(RecordServiceConfig):
     record_to_index = draft_record_to_index
     # WHY: We want to force user input choice here.
     draft_cls = None
-    draft_route = DraftResourceConfig.list_route
-    draft_action_route = DraftActionResourceConfig.list_route
+    draft_route = None
+    draft_action_route = None
     draft_link_builders = [
         DraftSelfLinkBuilder,
         DraftSelfHtmlLinkBuilder,

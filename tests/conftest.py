@@ -99,6 +99,8 @@ class CustomPIDManagerConfig(PIDManagerConfig):
 class CustomRecordDraftServiceConfig(RecordDraftServiceConfig):
     """Custom draft service config."""
 
+    draft_route = "/records/<pid_value>/draft"
+    draft_action_route = "/records/<pid_value>/draft/actions/<action>"
     draft_cls = CustomDraft
     record_cls = CustomRecord
     search_cls = TestSearch
