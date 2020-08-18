@@ -16,13 +16,15 @@ from ..drafts import DraftBase
 
 
 def draft_record_to_index(record):
-    """Return the index alias for records and drafts based objects.
+    """Return (<index alias>, <doc_type>) for records and drafts based objects.
 
-    Note: document type is deprecated and therefore returned as None
+    NOTE: document type is required for ES 6 suppport and will be removed when
+          unsupported.
+    TODO: Use $schema to fill index per issue #27
     """
     if isinstance(record, DraftBase):
-        return 'drafts', None
+        return 'drafts', "_doc"
     if isinstance(record, RecordBase):
-        return 'records', None
+        return 'records', "_doc"
     else:
         return None, None
