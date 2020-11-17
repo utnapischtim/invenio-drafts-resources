@@ -104,8 +104,10 @@ class DraftActionResourceConfig(DraftActionResourceConfigBase):
     list_route = "/mocks/<pid_value>/draft/actions/<action>"
 
     action_commands = {
-        "publish": "publish",
-        "command": "not_implemented"
+        "create": {
+            "publish": "publish",
+            "command": "not_implemented"
+        }
     }
 
     record_links_config = {

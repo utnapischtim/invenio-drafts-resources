@@ -13,6 +13,7 @@ from flask import abort, g
 from flask_resources import CollectionResource, SingletonResource
 from flask_resources.context import resource_requestctx
 from invenio_records_resources.config import ConfigLoaderMixin
+from invenio_records_resources.resources.actions import ActionResource
 
 from ...services import RecordDraftService
 from .config import DraftActionResourceConfig, DraftResourceConfig, \
@@ -113,7 +114,7 @@ class DraftVersionResource(CollectionResource, ConfigLoaderMixin):
         return item.to_dict(), 201
 
 
-class DraftActionResource(SingletonResource, ConfigLoaderMixin):
+class DraftActionResource(ActionResource, ConfigLoaderMixin):
     """Draft action resource."""
 
     default_config = DraftActionResourceConfig
@@ -123,31 +124,3 @@ class DraftActionResource(SingletonResource, ConfigLoaderMixin):
         super(DraftActionResource, self).__init__(
             config=self.load_config(config))
         self.service = service or RecordDraftService()
-
-    def create(self):
-        """Any POST business logic.
-
-        POST /records/:pid_value/actions/:action
-        """
-        action = resource_requestctx.route["action"]
-        try:
-            cmd_name = self.config.action_commands[action]
-            cmd_func = getattr(self.service, cmd_name)
-        except KeyError:
-            raise abort(404)
-        except AttributeError:
-            raise ActionNotImplementedError(cmd_name)
-
-        if cmd_name == "publish":
-            item = cmd_func(
-                resource_requestctx.route["pid_value"],
-                g.identity,
-                links_config=self.config.record_links_config
-            )
-        else:
-            item = cmd_func(
-                resource_requestctx.route["pid_value"],
-                g.identity,
-            )
-
-        return item.to_dict(), 202

@@ -10,6 +10,7 @@
 """Invenio Drafts Resources module to create REST APIs."""
 
 from invenio_records_resources.resources import RecordResourceConfig
+from invenio_records_resources.resources.actions import ActionResourceConfig
 
 from ..records import RecordLinksSchema
 from .schemas_links import DraftLinksSchema
@@ -26,14 +27,16 @@ class DraftResourceConfig(RecordResourceConfig):
     }
 
 
-class DraftActionResourceConfig(RecordResourceConfig):
+class DraftActionResourceConfig(ActionResourceConfig):
     """Draft action resource config."""
 
     list_route = "/records/<pid_value>/draft/actions/<action>"
     item_route = None  # To avoid issues, due to inheritance.
 
-    actions = {
-        "publish": "publish",
+    action_commands = {
+        "create": {
+            "publish": "publish",
+        }
     }
 
     record_links_config = {
