@@ -16,14 +16,18 @@ import pytest
 from flask_principal import Identity, Need, UserNeed
 from mock_module.resource import DraftActionResource, \
     DraftActionResourceConfig, DraftResource, DraftResourceConfig, \
-    DraftVersionResource, DraftVersionResourceConfig, RecordResource, \
-    RecordResourceConfig
+    DraftVersionResource, DraftVersionResourceConfig, \
+    DraftFileActionResourceConfig, DraftFileActionResource, \
+    DraftFileResourceConfig, DraftFileResource, RecordResource, \
+    RecordResourceConfig, RecordFileActionResource, \
+    RecordFileActionResourceConfig, RecordFileResource, \
+    RecordFileResourceConfig
 from mock_module.service import Service, ServiceConfig
 
 
 @pytest.fixture(scope="module")
 def record_resource():
-    """Resource."""
+    """Record resource."""
     # FIXME
     # This should work but doesn't because the application context is checked
     # to see if it's been overridden in the config.
@@ -35,8 +39,26 @@ def record_resource():
 
 
 @pytest.fixture(scope="module")
+def record_file_resource():
+    """Record file resource."""
+    return RecordFileResource(
+        config=RecordFileResourceConfig,
+        service=Service(config=ServiceConfig)
+    )
+
+
+@pytest.fixture(scope="module")
+def record_file_action_resource():
+    """Record file action resource."""
+    return RecordFileActionResource(
+        config=RecordFileActionResourceConfig,
+        service=Service(config=ServiceConfig)
+    )
+
+
+@pytest.fixture(scope="module")
 def draft_resource():
-    """Resource."""
+    """Draft resource."""
     # FIXME
     # This should work but doesn't because the application context is checked
     # to see if it's been overridden in the config.
@@ -48,8 +70,8 @@ def draft_resource():
 
 
 @pytest.fixture(scope="module")
-def action_resource():
-    """Action Resource."""
+def draft_action_resource():
+    """Draft action resource."""
     # FIXME
     # This should work but doesn't because the application context is checked
     # to see if it's been overridden in the config.
@@ -62,7 +84,7 @@ def action_resource():
 
 @pytest.fixture(scope="module")
 def version_resource():
-    """Version Resource."""
+    """Draft version Resource."""
     # FIXME
     # This should work but doesn't because the application context is checked
     # to see if it's been overridden in the config.
@@ -72,15 +94,46 @@ def version_resource():
         service=Service(config=ServiceConfig)
     )
 
+@pytest.fixture(scope="module")
+def draft_file_resource():
+    """Draft file resource."""
+    return DraftFileResource(
+        config=DraftFileResourceConfig,
+        service=Service(config=ServiceConfig)
+    )
+
 
 @pytest.fixture(scope="module")
-def base_app(base_app, record_resource, draft_resource, action_resource,
-             version_resource):
+def draft_file_action_resource():
+    """Draft file action resource."""
+    return DraftFileActionResource(
+        config=DraftFileActionResourceConfig,
+        service=Service(config=ServiceConfig)
+    )
+
+
+@pytest.fixture(scope="module")
+def base_app(base_app, record_resource, record_file_resource,
+            record_file_action_resource, draft_resource, draft_action_resource,
+            version_resource, draft_file_resource, draft_file_action_resource):
     """Application factory fixture."""
+    # records
     base_app.register_blueprint(record_resource.as_blueprint('mock_record'))
+    # record files
+    base_app.register_blueprint(
+        record_file_resource.as_blueprint('mock_record_files'))
+    base_app.register_blueprint(
+        record_file_action_resource.as_blueprint('mock_record_files_action'))
+    # drafts
     base_app.register_blueprint(draft_resource.as_blueprint('mock_draft'))
-    base_app.register_blueprint(action_resource.as_blueprint('mock_action'))
+    base_app.register_blueprint(
+        draft_action_resource.as_blueprint('mock_draft_action'))
     base_app.register_blueprint(version_resource.as_blueprint('mock_version'))
+    # draft files
+    base_app.register_blueprint(
+        draft_file_resource.as_blueprint('mock_draft_files'))
+    base_app.register_blueprint(
+        draft_file_action_resource.as_blueprint('mock_draft_files_action'))
     # FIXME: Why is this commented out? Also in records-resources
     # base_app.register_error_handler(HTTPException, handle_http_exception)
     yield base_app

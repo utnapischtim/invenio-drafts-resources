@@ -20,6 +20,14 @@ from invenio_drafts_resources.resources import \
 from invenio_drafts_resources.resources import \
     DraftActionResourceConfig as DraftActionResourceConfigBase
 from invenio_drafts_resources.resources import \
+    DraftFileActionResourceConfig as DraftFileActionResourceConfigBase
+from invenio_drafts_resources.resources import \
+    DraftFileActionResource as DraftFileActionResourceBase
+from invenio_drafts_resources.resources import \
+    DraftFileResourceConfig as DraftFileResourceConfigBase
+from invenio_drafts_resources.resources import \
+    DraftFileResource as DraftFileResourceBase
+from invenio_drafts_resources.resources import \
     DraftResource as DraftResourceBase
 from invenio_drafts_resources.resources import \
     DraftResourceConfig as DraftResourceConfigBase
@@ -31,6 +39,14 @@ from invenio_drafts_resources.resources import \
     RecordResource as RecordResourceBase
 from invenio_drafts_resources.resources import \
     RecordResourceConfig as RecordResourceConfigBase
+from invenio_drafts_resources.resources import \
+    RecordFileResourceConfig as RecordFileResourceConfigBase
+from invenio_drafts_resources.resources import \
+    RecordFileResource as RecordRecordFileResourceBase
+from invenio_drafts_resources.resources import \
+    RecordFileActionResourceConfig as RecordFileActionResourceConfigBase
+from invenio_drafts_resources.resources import \
+    RecordFileActionResource as RecordFileActionResourceBase
 
 
 class RecordLinksSchema(Schema):
@@ -59,8 +75,11 @@ class DraftLinksSchema(Schema):
     )
 
 
+##
+# RECORDS
+##
 class RecordResourceConfig(RecordResourceConfigBase):
-    """Mock service configuration."""
+    """Mock record resource configuration."""
 
     list_route = "/mocks"
     item_route = f"{list_route}/<pid_value>"
@@ -76,13 +95,41 @@ class RecordResourceConfig(RecordResourceConfigBase):
 
 
 class RecordResource(RecordResourceBase):
-    """Mock service."""
+    """Mock record resource."""
 
     default_config = RecordResourceConfig
 
 
+class RecordFileResourceConfig(RecordFileResourceConfigBase):
+    """Mock record file resource."""
+
+    item_route = "/mocks/<pid_value>/files/<key>"
+    list_route = "/mocks/<pid_value>/files"
+
+
+class RecordFileResource(RecordRecordFileResourceBase):
+    """Mock record file resource config."""
+
+    default_config = RecordFileResourceConfig
+
+
+class RecordFileActionResourceConfig(RecordFileActionResourceConfigBase):
+    """Mock record file resource."""
+
+    list_route = "/mocks/<pid_value>/files/<key>/<action>"
+
+
+class RecordFileActionResource(RecordFileActionResourceBase):
+    """Mock record file resource config."""
+
+    default_config = RecordFileActionResourceConfig
+
+
+##
+# DRAFTS
+##
 class DraftResourceConfig(DraftResourceConfigBase):
-    """Mock service configuration."""
+    """Mock draft resource configuration."""
 
     list_route = "/mocks/<pid_value>/draft"
 
@@ -93,13 +140,13 @@ class DraftResourceConfig(DraftResourceConfigBase):
 
 
 class DraftResource(DraftResourceBase):
-    """Mock service."""
+    """Mock draft resource."""
 
     default_config = DraftResourceConfig
 
 
 class DraftActionResourceConfig(DraftActionResourceConfigBase):
-    """Mock service configuration."""
+    """Mock draft action resource configuration."""
 
     list_route = "/mocks/<pid_value>/draft/actions/<action>"
 
@@ -116,18 +163,46 @@ class DraftActionResourceConfig(DraftActionResourceConfigBase):
 
 
 class DraftActionResource(DraftActionResourceBase):
-    """Mock service."""
+    """Mock draft action resource."""
 
     default_config = DraftActionResourceConfig
 
 
+class DraftFileResourceConfig(DraftFileResourceConfigBase):
+    """Mock record file resource."""
+
+    item_route = "/mocks/<pid_value>/draft/files/<key>"
+    list_route = "/mocks/<pid_value>/draft/files"
+
+
+class DraftFileResource(DraftFileResourceBase):
+    """Mock record file resource config."""
+
+    default_config = DraftFileResourceConfig
+
+
+class DraftFileActionResourceConfig(DraftFileActionResourceConfigBase):
+    """Mock record file resource."""
+
+    list_route = "/mocks/<pid_value>/draft/files/<key>/<action>"
+
+
+class DraftFileActionResource(DraftFileActionResourceBase):
+    """Mock record file resource config."""
+
+    default_config = DraftFileActionResourceConfig
+
+
+##
+# VERSIONING
+##
 class DraftVersionResourceConfig(DraftVersionResourceConfigBase):
-    """Mock service configuration."""
+    """Mock draft version resource configuration."""
 
     list_route = "/mocks/<pid_value>/versions"
 
 
 class DraftVersionResource(DraftVersionResourceBase):
-    """Mock service."""
+    """Mock draft version resource."""
 
     default_config = DraftVersionResourceConfig

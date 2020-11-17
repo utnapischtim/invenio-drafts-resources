@@ -12,11 +12,23 @@
 from .drafts import DraftActionResource, DraftActionResourceConfig, \
     DraftLinksSchema, DraftResource, DraftResourceConfig, \
     DraftVersionResource, DraftVersionResourceConfig
+from .files import DraftFileActionResourceConfig, DraftFileActionResource, \
+    DraftFileResourceConfig, DraftFileResource, \
+    RecordFileActionResourceConfig, RecordFileActionResource, \
+    RecordFileResource, RecordFileResourceConfig
 from .records import RecordResource, RecordResourceConfig
 from .userrecords import UserRecordsResource
 from .userrecords_config import UserRecordsResourceConfig
 
 __all__ = (
+    "DraftFileResourceConfig",
+    "DraftFileResource",
+    "DraftFileActionResourceConfig",
+    "DraftFileActionResource",
+    "RecordFileResourceConfig",
+    "RecordFileResource",
+    "RecordFileActionResourceConfig",
+    "RecordFileActionResource",
     "DraftActionResource",
     "DraftActionResourceConfig",
     "DraftLinksSchema",
