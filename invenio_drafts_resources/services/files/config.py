@@ -10,8 +10,6 @@
 """RecordDraft File Service API config."""
 
 from invenio_records_resources.services import \
-    FileMetadataServiceConfig as FileMetadataServiceConfigBase
-from invenio_records_resources.services import \
     FileServiceConfig as FileServiceConfigBase
 
 
@@ -21,7 +19,7 @@ class FileServiceConfig(FileServiceConfigBase):
     pass
 
 
-class FileMetadataServiceConfig(FileMetadataServiceConfigBase):
+class FileMetadataServiceConfig(FileServiceConfigBase):
     """Draft File Metadata Service configuration."""
 
     # TODO: FILL ME!

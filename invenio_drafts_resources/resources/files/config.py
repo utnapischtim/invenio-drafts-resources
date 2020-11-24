@@ -30,7 +30,7 @@ class RecordFileActionResourceConfig(FileActionResourceConfig):
 
 
 
-class DraftFileResourceConfig(ResourceConfig):
+class DraftFileResourceConfig(RecordFileResourceConfig):
     """Record resource config."""
 
     item_route = "/records/<pid_value>/draft/files/<key>"
@@ -38,10 +38,10 @@ class DraftFileResourceConfig(ResourceConfig):
 
 
 
-class DraftFileActionResourceConfig(ActionResourceConfig):
+class DraftFileActionResourceConfig(FileActionResourceConfig):
     """Record resource config."""
 
-    list_route = "/records/<pid_value>/files/<key>/<action>"
+    list_route = "/records/<pid_value>/draft/files/<key>/<action>"
     action_commands = {
         'create': {
             'commit': 'commit_file'

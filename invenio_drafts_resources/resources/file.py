@@ -13,7 +13,7 @@ from flask_resources import CollectionResource, SingletonResource
 from flask_resources.context import resource_requestctx
 
 from ..services import FileMetadataService, FileService
-from .file_config import DraftFileActionResourceConfig, DraftFileResourceConfig
+from .files.config import DraftFileActionResourceConfig, DraftFileResourceConfig
 
 
 class DraftFileResource(CollectionResource):
@@ -67,7 +67,7 @@ class DraftFileResource(CollectionResource):
 class DraftFileActionResource(SingletonResource):
     """Draft file action resource."""
 
-    default_config = DraftFileResourceConfig
+    default_config = DraftFileActionResourceConfig
 
     def __init__(self, service=None, *args, **kwargs):
         """Constructor."""

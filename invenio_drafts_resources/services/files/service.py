@@ -11,12 +11,12 @@
 """RecordDraft File Service API."""
 
 
-from invenio_records_resources.services import FileMetadataService, FileService
+from invenio_records_resources.services import RecordFileService
 
 from .config import FileMetadataServiceConfig, FileServiceConfig
 
 
-class FileService(FileService):
+class FileService(RecordFileService):
     """RecordDraft File Service."""
 
     # NOTE: We can just rely on Records-Resources FileService.
@@ -24,7 +24,7 @@ class FileService(FileService):
     default_config = FileServiceConfig
 
 
-class FileMetadataService(FileMetadataService):
+class FileMetadataService(RecordFileService):
     """RecordDraft File Metadata Service."""
 
     # NOTE: We can just rely on Records-Resources FileService.
