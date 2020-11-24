@@ -30,13 +30,11 @@ class RecordFileActionResourceConfig(FileActionResourceConfig):
     }
 
 
-
 class DraftFileResourceConfig(RecordFileResourceConfig):
     """Record resource config."""
 
     item_route = "/records/<pid_value>/draft/files/<key>"
     list_route = "/records/<pid_value>/draft/files"
-
 
 
 class DraftFileActionResourceConfig(FileActionResourceConfig):
@@ -48,10 +46,10 @@ class DraftFileActionResourceConfig(FileActionResourceConfig):
             'commit': 'commit_file'
         },
         'read': {
-            'content': 'download_file'
+            'content': 'get_file_content'
         },
         'update': {
-            'content': 'upload_file'
+            'content': 'set_file_content'
         },
         'delete': {}
     }
