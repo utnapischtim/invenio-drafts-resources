@@ -11,14 +11,17 @@
 
 # from flask import abort, g
 from flask_resources import CollectionResource
-# from flask_resources.context import resource_requestctx
-
 from invenio_records_resources.config import ConfigLoaderMixin
-from invenio_records_resources.resources import FileResource, FileActionResource
+from invenio_records_resources.resources import FileActionResource, \
+    FileResource
 from invenio_records_resources.resources.actions import ActionResource
 
-from .config import DraftFileResourceConfig, DraftFileActionResourceConfig, \
-    RecordFileResourceConfig, RecordFileActionResourceConfig
+from .config import DraftFileActionResourceConfig, DraftFileResourceConfig, \
+    RecordFileActionResourceConfig, RecordFileResourceConfig
+
+# from flask_resources.context import resource_requestctx
+
+
 
 
 class RecordFileResource(CollectionResource, ConfigLoaderMixin):

@@ -15,13 +15,13 @@ fixtures are available.
 import pytest
 from flask_principal import Identity, Need, UserNeed
 from mock_module.resource import DraftActionResource, \
-    DraftActionResourceConfig, DraftResource, DraftResourceConfig, \
+    DraftActionResourceConfig, DraftFileActionResource, \
+    DraftFileActionResourceConfig, DraftFileResource, \
+    DraftFileResourceConfig, DraftResource, DraftResourceConfig, \
     DraftVersionResource, DraftVersionResourceConfig, \
-    DraftFileActionResourceConfig, DraftFileActionResource, \
-    DraftFileResourceConfig, DraftFileResource, RecordResource, \
-    RecordResourceConfig, RecordFileActionResource, \
-    RecordFileActionResourceConfig, RecordFileResource, \
-    RecordFileResourceConfig
+    RecordFileActionResource, RecordFileActionResourceConfig, \
+    RecordFileResource, RecordFileResourceConfig, RecordResource, \
+    RecordResourceConfig
 from mock_module.service import Service, ServiceConfig
 
 

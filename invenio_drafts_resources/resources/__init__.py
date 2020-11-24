@@ -12,10 +12,10 @@
 from .drafts import DraftActionResource, DraftActionResourceConfig, \
     DraftLinksSchema, DraftResource, DraftResourceConfig, \
     DraftVersionResource, DraftVersionResourceConfig
-from .files import DraftFileActionResourceConfig, DraftFileActionResource, \
-    DraftFileResourceConfig, DraftFileResource, \
-    RecordFileActionResourceConfig, RecordFileActionResource, \
-    RecordFileResource, RecordFileResourceConfig
+from .files import DraftFileActionResource, DraftFileActionResourceConfig, \
+    DraftFileResource, DraftFileResourceConfig, RecordFileActionResource, \
+    RecordFileActionResourceConfig, RecordFileResource, \
+    RecordFileResourceConfig
 from .records import RecordResource, RecordResourceConfig
 from .userrecords import UserRecordsResource
 from .userrecords_config import UserRecordsResourceConfig

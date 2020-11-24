@@ -20,13 +20,13 @@ from invenio_drafts_resources.resources import \
 from invenio_drafts_resources.resources import \
     DraftActionResourceConfig as DraftActionResourceConfigBase
 from invenio_drafts_resources.resources import \
-    DraftFileActionResourceConfig as DraftFileActionResourceConfigBase
-from invenio_drafts_resources.resources import \
     DraftFileActionResource as DraftFileActionResourceBase
 from invenio_drafts_resources.resources import \
-    DraftFileResourceConfig as DraftFileResourceConfigBase
+    DraftFileActionResourceConfig as DraftFileActionResourceConfigBase
 from invenio_drafts_resources.resources import \
     DraftFileResource as DraftFileResourceBase
+from invenio_drafts_resources.resources import \
+    DraftFileResourceConfig as DraftFileResourceConfigBase
 from invenio_drafts_resources.resources import \
     DraftResource as DraftResourceBase
 from invenio_drafts_resources.resources import \
@@ -36,17 +36,17 @@ from invenio_drafts_resources.resources import \
 from invenio_drafts_resources.resources import \
     DraftVersionResourceConfig as DraftVersionResourceConfigBase
 from invenio_drafts_resources.resources import \
-    RecordResource as RecordResourceBase
-from invenio_drafts_resources.resources import \
-    RecordResourceConfig as RecordResourceConfigBase
-from invenio_drafts_resources.resources import \
-    RecordFileResourceConfig as RecordFileResourceConfigBase
-from invenio_drafts_resources.resources import \
-    RecordFileResource as RecordRecordFileResourceBase
+    RecordFileActionResource as RecordFileActionResourceBase
 from invenio_drafts_resources.resources import \
     RecordFileActionResourceConfig as RecordFileActionResourceConfigBase
 from invenio_drafts_resources.resources import \
-    RecordFileActionResource as RecordFileActionResourceBase
+    RecordFileResource as RecordRecordFileResourceBase
+from invenio_drafts_resources.resources import \
+    RecordFileResourceConfig as RecordFileResourceConfigBase
+from invenio_drafts_resources.resources import \
+    RecordResource as RecordResourceBase
+from invenio_drafts_resources.resources import \
+    RecordResourceConfig as RecordResourceConfigBase
 
 
 class RecordLinksSchema(Schema):

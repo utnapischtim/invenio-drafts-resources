@@ -13,7 +13,8 @@ from flask_resources import CollectionResource, SingletonResource
 from flask_resources.context import resource_requestctx
 
 from ..services import FileMetadataService, FileService
-from .files.config import DraftFileActionResourceConfig, DraftFileResourceConfig
+from .files.config import DraftFileActionResourceConfig, \
+    DraftFileResourceConfig
 
 
 class DraftFileResource(CollectionResource):

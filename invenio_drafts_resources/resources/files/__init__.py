@@ -8,10 +8,10 @@
 
 """Invenio Resources module to create REST APIs."""
 
-from .config import DraftFileResourceConfig, DraftFileActionResourceConfig, \
-    RecordFileResourceConfig, RecordFileActionResourceConfig
-from .resource import DraftFileResource, DraftFileActionResource, \
-    RecordFileResource, RecordFileActionResource
+from .config import DraftFileActionResourceConfig, DraftFileResourceConfig, \
+    RecordFileActionResourceConfig, RecordFileResourceConfig
+from .resource import DraftFileActionResource, DraftFileResource, \
+    RecordFileActionResource, RecordFileResource
 
 __all__ = (
     "DraftFileResourceConfig",

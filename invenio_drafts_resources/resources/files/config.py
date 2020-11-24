@@ -10,7 +10,8 @@
 """File resource configuration."""
 
 from flask_resources.resources import ResourceConfig
-from invenio_records_resources.resources import FileActionResourceConfig, \
+from invenio_records_resources.resources import FileActionResourceConfig
+from invenio_records_resources.resources import \
     FileResourceConfig as RecordFileResourceConfig
 from invenio_records_resources.resources.actions import ActionResourceConfig
 
