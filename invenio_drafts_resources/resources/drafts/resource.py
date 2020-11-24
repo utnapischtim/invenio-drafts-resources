@@ -119,6 +119,16 @@ class DraftActionResource(ActionResource, ConfigLoaderMixin):
 
     default_config = DraftActionResourceConfig
 
+    def create_publish(self, action, operation):
+        """Publish the draft."""
+        cmd_func = self._get_cmd_func(action, operation)
+        item = cmd_func(
+            resource_requestctx.route["pid_value"],
+            g.identity,
+            links_config=self.config.record_links_config
+        )
+        return item.to_dict(), 202
+
     def __init__(self, service=None, config=None):
         """Constructor."""
         super(DraftActionResource, self).__init__(

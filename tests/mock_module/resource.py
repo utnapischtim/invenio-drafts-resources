@@ -157,6 +157,10 @@ class DraftActionResourceConfig(DraftActionResourceConfigBase):
         }
     }
 
+    links_config = {
+        "record": DraftLinksSchema
+    }
+
     record_links_config = {
         "record": RecordLinksSchema
     }
@@ -166,6 +170,10 @@ class DraftActionResource(DraftActionResourceBase):
     """Mock draft action resource."""
 
     default_config = DraftActionResourceConfig
+
+    def create_command(self, action, operation):
+        """Dummy handler."""
+        return self._get_cmd_func(action, operation).to_dict(), 200
 
 
 class DraftFileResourceConfig(DraftFileResourceConfigBase):
