@@ -19,10 +19,6 @@ from invenio_records_resources.resources.actions import ActionResource
 from .config import DraftFileActionResourceConfig, DraftFileResourceConfig, \
     RecordFileActionResourceConfig, RecordFileResourceConfig
 
-# from flask_resources.context import resource_requestctx
-
-
-
 
 class RecordFileResource(CollectionResource, ConfigLoaderMixin):
     """Record file resource.
@@ -36,7 +32,8 @@ class RecordFileResource(CollectionResource, ConfigLoaderMixin):
 
     def __init__(self, config=None, service=None):
         """Constructor."""
-        super(RecordFileResource, self).__init__(config=self.load_config(config))
+        super(RecordFileResource, self).__init__(
+            config=self.load_config(config))
         self.service = None  # Force user's set up
 
     # ListView GET
@@ -75,4 +72,3 @@ class DraftFileActionResource(FileActionResource):
     """
 
     default_config = DraftFileActionResourceConfig
-

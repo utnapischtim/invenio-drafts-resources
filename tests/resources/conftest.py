@@ -94,6 +94,7 @@ def version_resource():
         service=Service(config=ServiceConfig)
     )
 
+
 @pytest.fixture(scope="module")
 def draft_file_resource():
     """Draft file resource."""
@@ -113,9 +114,10 @@ def draft_file_action_resource():
 
 
 @pytest.fixture(scope="module")
-def base_app(base_app, record_resource, record_file_resource,
-            record_file_action_resource, draft_resource, draft_action_resource,
-            version_resource, draft_file_resource, draft_file_action_resource):
+def base_app(
+        base_app, record_resource, record_file_resource,
+        record_file_action_resource, draft_resource, draft_action_resource,
+        version_resource, draft_file_resource, draft_file_action_resource):
     """Application factory fixture."""
     # records
     base_app.register_blueprint(record_resource.as_blueprint('mock_record'))
