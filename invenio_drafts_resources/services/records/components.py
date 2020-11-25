@@ -9,7 +9,32 @@
 """Records service copmonent base classes."""
 
 from invenio_records_resources.services.records.components import \
-    MetadataComponent, ServiceComponent
+    FilesComponent, MetadataComponent, ServiceComponent
+
+
+class DraftFilesComponent(FilesComponent):
+    """Draft files service component."""
+
+    # TODO: Add tests for publishing a draft with files
+    def publish(self, draft=None, record=None):
+        """Copy bucket and files to record."""
+        draft_files = draft.files
+        bucket = draft_files.bucket
+        if bucket:
+            # Set the draft bucket on the record also
+            record.bucket = bucket
+            record.bucket_id = bucket.id
+            # Lock the bucket
+            bucket.locked = True
+            # TODO: actually "sync"
+            # Copy over the files
+            for key, df in draft_files.items():
+                # TODO: Fix __setitem__ in FilesField, to support `None` for
+                # metadata
+                if df.metadata is not None:
+                    record.files[key] = df.object_version, df.metadata
+                else:
+                    record.files[key] = df.object_version
 
 
 class RelationsComponent(ServiceComponent):
