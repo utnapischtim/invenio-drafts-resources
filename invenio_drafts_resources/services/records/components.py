@@ -20,12 +20,16 @@ class DraftFilesComponent(FilesComponent):
         """Copy bucket and files to record."""
         draft_files = draft.files
         bucket = draft_files.bucket
-        if bucket:
+        if draft.files.enabled and bucket:
             # Set the draft bucket on the record also
             record.bucket = bucket
             record.bucket_id = bucket.id
+
             # Lock the bucket
-            bucket.locked = True
+            # TODO: Fix issues in REST API and UI for not allowing files to be
+            # modified after editing a published record.
+            # bucket.locked = True
+
             # TODO: actually "sync"
             # Copy over the files
             for key, df in draft_files.items():
@@ -35,6 +39,10 @@ class DraftFilesComponent(FilesComponent):
                     record.files[key] = df.object_version, df.metadata
                 else:
                     record.files[key] = df.object_version
+        # TODO: Normally we don't need this... on record creation from a draft
+        # with disabled files, the record should start with `enabled=False`.
+        elif not draft.files.enabled:
+            record.files.enabled = False
 
 
 class RelationsComponent(ServiceComponent):

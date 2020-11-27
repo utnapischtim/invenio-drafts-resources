@@ -6,64 +6,110 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""Invenio Resources module to create REST APIs"""
+"""Test files resource integration."""
+
+from io import BytesIO
 
 import pytest
 
-BASE_RECORDS_FILES_ENDPOINT = "/mocks/12345-ABCD/files"
-BASE_DRAFTS_FILES_ENDPOINT = "/mocks/12345-ABCD/draft/files"
 
-
-# TODO: Test when file components controlling publish/edit work
 @pytest.mark.skip()
-def test_status_codes(client, es_clear, headers):
+def test_files_publish_flow(client, es_clear, location, headers):
     """Test record creation."""
     h = headers
-    # On a draft record
-    # Initialize files upload
-    response = client.post(BASE_DRAFTS_FILES_ENDPOINT, headers=h)
-    assert response.status_code == 201
-    # Upload a file
-    response = client.put(
-        f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf/content", headers=h)
-    # Temporary until service is implemented then 202
-    assert response.status_code == 500
-    # Commit the uploaded file
-    response = client.post(
-        f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf/commit", headers=h)
-    # Temporary until service is implemented then 202
-    assert response.status_code == 500
-    # Download the uploaded file
-    response = client.get(
-        f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf/content", headers=h)
-    # Temporary until service is implemented then 202
-    assert response.status_code == 500
-    # Update file metadata a second file
-    response = client.put(f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf", headers=h)
-    assert response.status_code == 200
-    # Read a file
-    response = client.get(f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf", headers=h)
-    assert response.status_code == 200
-    # Get all files a file
-    response = client.get(BASE_DRAFTS_FILES_ENDPOINT, headers=h)
-    assert response.status_code == 200
-    # Delete a file
-    response = client.delete(
-        f"{BASE_DRAFTS_FILES_ENDPOINT}/file.pdf", headers=h)
-    assert response.status_code == 204
-    # Delete all files
-    response = client.delete(BASE_DRAFTS_FILES_ENDPOINT, headers=h)
-    assert response.status_code == 204
+    # Create a draft
+    res = client.post("/mocks", headers=h, json={
+        'metadata': {'title': 'Test'}
+    })
+    assert res.status_code == 201
+    id_ = res.json['id']
 
-    # On a published record
-    # Read a fil
-    response = client.get(f"{BASE_RECORDS_FILES_ENDPOINT}/file.pdf", headers=h)
-    assert response.status_code == 200
-    # Get all files a file
-    response = client.get(BASE_RECORDS_FILES_ENDPOINT, headers=h)
-    assert response.status_code == 200
-    # Download the uploaded file
-    response = client.get(
-        f"{BASE_RECORDS_FILES_ENDPOINT}/file.pdf/content", headers=h)
-    # Temporary until service is implemented then 202
-    assert response.status_code == 500
+    # Initialize files upload
+    res = client.post(f"/mocks/{id_}/draft/files", headers=h, json=[
+        {'key': 'test.pdf'}
+    ])
+    assert res.status_code == 201
+    assert res.json['entries'][0]['key'] == 'test.pdf'
+    assert res.json['entries'][0]['status'] == 'pending'
+
+    # Upload a file
+    res = client.put(
+        f"/mocks/{id_}/draft/files/test.pdf/content",
+        headers={'content-type': 'application/octet-stream'},
+        data=BytesIO(b'testfile'),
+    )
+    assert res.status_code == 200
+
+    # Commit the file
+    res = client.post(f"/mocks/{id_}/draft/files/test.pdf/commit", headers=h)
+    assert res.status_code == 200
+    assert res.json['key'] == 'test.pdf'
+    assert res.json['status'] == 'completed'
+
+    # Publish the record
+    res = client.post(f"/mocks/{id_}/draft/actions/publish", headers=h)
+    assert res.status_code == 202
+
+    # Check published files
+    res = client.get(f"/mocks/{id_}/files", headers=h)
+    assert res.status_code == 200
+    assert res.json['key'] == 'test.pdf'
+    assert res.json['status'] == 'completed'
+
+    # Edit the record
+    res = client.post(f"/mocks/{id_}/draft", headers=h)
+    assert res.status_code == 201
+
+    # Publish again
+    res = client.post(f"/mocks/{id_}/draft/actions/publish", headers=h)
+    assert res.status_code == 202
+
+    # Check published files
+    res = client.get(f"/mocks/{id_}/files", headers=h)
+    assert res.status_code == 200
+    assert res.json['key'] == 'test.pdf'
+    assert res.json['status'] == 'completed'
+
+
+@pytest.mark.skip()
+def test_metadata_only_record(client, es_clear, location, headers):
+    """Test record with files disabled."""
+    h = headers
+    # Create a draft
+    res = client.post("/mocks", headers=h, json={
+        'metadata': {'title': 'Test'}
+    })
+    assert res.status_code == 201
+    id_ = res.json['id']
+
+    # Disable files
+    res = client.put(f"/mocks/{id_}/draft/files", headers=h, json={
+        'enabled': False,
+    })
+    assert res.status_code == 200
+    assert res.json['enabled'] is False
+    assert 'entries' not in res.json
+
+    # Publish the record
+    res = client.post(f"/mocks/{id_}/draft/actions/publish", headers=h)
+    assert res.status_code == 202
+
+    # Check published files
+    res = client.get(f"/mocks/{id_}/files", headers=h)
+    assert res.status_code == 200
+    assert res.json['enabled'] is False
+    assert 'entries' not in res.json
+
+    # Edit the record
+    res = client.post(f"/mocks/{id_}/draft", headers=h)
+    assert res.status_code == 201
+
+    # Publish again
+    res = client.post(f"/mocks/{id_}/draft/actions/publish", headers=h)
+    assert res.status_code == 202
+
+    # Check published files
+    res = client.get(f"/mocks/{id_}/files", headers=h)
+    assert res.status_code == 200
+    assert res.json['enabled'] is False
+    assert 'entries' not in res.json
