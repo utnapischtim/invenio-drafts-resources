@@ -11,7 +11,7 @@
 
 from invenio_records_resources.services import RecordServiceConfig
 from invenio_records_resources.services.records.components import \
-    AccessComponent, FilesComponent, MetadataComponent, PIDSComponent
+    MetadataComponent
 
 from .components import RelationsComponent
 from .permissions import RecordDraftPermissionPolicy

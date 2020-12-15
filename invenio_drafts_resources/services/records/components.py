@@ -9,10 +9,10 @@
 """Records service copmonent base classes."""
 
 from invenio_records_resources.services.records.components import \
-    FilesComponent, MetadataComponent, ServiceComponent
+    MetadataComponent, ServiceComponent
 
 
-class DraftFilesComponent(FilesComponent):
+class DraftFilesComponent(ServiceComponent):
     """Draft files service component."""
 
     # TODO: Add tests for publishing a draft with files
