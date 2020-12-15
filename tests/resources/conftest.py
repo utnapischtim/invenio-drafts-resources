@@ -28,89 +28,49 @@ from mock_module.service import Service, ServiceConfig
 @pytest.fixture(scope="module")
 def record_resource():
     """Record resource."""
-    # FIXME
-    # This should work but doesn't because the application context is checked
-    # to see if it's been overridden in the config.
-    # return Resource(service=Service())
-    return RecordResource(
-        config=RecordResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return RecordResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def record_file_resource():
     """Record file resource."""
-    return RecordFileResource(
-        config=RecordFileResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return RecordFileResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def record_file_action_resource():
     """Record file action resource."""
-    return RecordFileActionResource(
-        config=RecordFileActionResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return RecordFileActionResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def draft_resource():
     """Draft resource."""
-    # FIXME
-    # This should work but doesn't because the application context is checked
-    # to see if it's been overridden in the config.
-    # return Resource(service=Service())
-    return DraftResource(
-        config=DraftResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return DraftResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def draft_action_resource():
     """Draft action resource."""
-    # FIXME
-    # This should work but doesn't because the application context is checked
-    # to see if it's been overridden in the config.
-    # return Resource(service=Service())
-    return DraftActionResource(
-        config=DraftActionResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return DraftActionResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def version_resource():
     """Draft version Resource."""
-    # FIXME
-    # This should work but doesn't because the application context is checked
-    # to see if it's been overridden in the config.
-    # return Resource(service=Service())
-    return DraftVersionResource(
-        config=DraftVersionResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return DraftVersionResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def draft_file_resource():
     """Draft file resource."""
-    return DraftFileResource(
-        config=DraftFileResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return DraftFileResource(service=Service())
 
 
 @pytest.fixture(scope="module")
 def draft_file_action_resource():
     """Draft file action resource."""
-    return DraftFileActionResource(
-        config=DraftFileActionResourceConfig,
-        service=Service(config=ServiceConfig)
-    )
+    return DraftFileActionResource(service=Service())
 
 
 @pytest.fixture(scope="module")
