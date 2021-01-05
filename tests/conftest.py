@@ -15,6 +15,8 @@ fixtures are available.
 import pytest
 from invenio_app.factory import create_api as _create_api
 
+pytest_plugins = ("celery.contrib.pytest", )
+
 
 @pytest.fixture(scope="module")
 def extra_entry_points():

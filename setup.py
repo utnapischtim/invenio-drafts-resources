@@ -16,7 +16,7 @@ readme = open("README.rst").read()
 history = open("CHANGES.rst").read()
 
 tests_require = [
-    "pytest-invenio>=1.4.0",
+    "pytest-invenio>=1.4.1",
     "invenio-app>=1.3.0",
     "docker-services-cli>=0.3.0"
 ]
