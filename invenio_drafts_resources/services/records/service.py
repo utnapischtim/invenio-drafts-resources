@@ -49,12 +49,12 @@ class RecordDraftService(RecordService):
         # params is used by the resource, and kwargs is used to have an easier
         # programatic interface .search(idty, q='...') instead of
         # .search(idty, params={'q': '...'}).
-        status = kwargs.pop("status", "published")
         params = params or {}
         params.update(kwargs)
 
         # Create a Elasticsearch DSL
         # Params are returned as [], we give priority to published.
+        status = params.pop("status", "published")
         _record_cls = self.draft_cls if "draft" == status else self.record_cls
 
         search = self.search_request(

@@ -109,12 +109,9 @@ def test_delete_draft(client, input_data, es_clear):
     assert update_response.status_code == 204
 
     # Check draft deletion
-    # FIXME: Remove import when exception is properly handled
-    with pytest.raises(NoResultFound):
-        update_response = client.get(
-            "/mocks/{}/draft".format(recid), headers=HEADERS)
-
-        assert update_response.status_code == 404
+    update_response = client.get(
+        "/mocks/{}/draft".format(recid), headers=HEADERS)
+    assert update_response.status_code == 404
 
 
 def _create_and_publish(client, input_data):
@@ -144,12 +141,10 @@ def test_publish_draft(client, input_data, es_clear):
     recid = _create_and_publish(client, input_data)
 
     # Check draft does not exists anymore
-    # FIXME: Remove import when exception is properly handled
-    with pytest.raises(NoResultFound):
-        response = client.get(
-            "/mocks/{}/draft".format(recid), headers=HEADERS)
+    response = client.get(
+        "/mocks/{}/draft".format(recid), headers=HEADERS)
 
-        assert response.status_code == 404
+    assert response.status_code == 404
 
     # Check record exists
     response = client.get("/mocks/{}".format(recid), headers=HEADERS)
