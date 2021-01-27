@@ -60,7 +60,7 @@ setup_requires = [
 
 install_requires = [
     "invenio-pidrelations>=0.1.0,<2.0.0",
-    "invenio-records-resources>=0.10.0",
+    "invenio-records-resources>=0.10.1",
 ]
 
 packages = find_packages()
