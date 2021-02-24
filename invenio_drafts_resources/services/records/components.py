@@ -44,6 +44,32 @@ class DraftFilesComponent(ServiceComponent):
         elif not draft.files.enabled:
             record.files.enabled = False
 
+    def delete_draft(self, identity, draft=None, record=None, force=False):
+        """Delete files associated with a draft if unpublished.
+
+        :param force: If force is True, it means that the draft is being force
+            deleted instead of soft deleted (i.e. an unpublished draft).
+        """
+        # If a draft is unpublished, we remove the associated files and bucket.
+        # If a draft is published, we keep the files around until we expire the
+        # draft.
+        if force and draft.files.enabled:
+            draft_files = draft.files
+            bucket = draft_files.bucket
+            # Collect keys to alter dict during the iteration.
+            # TODO: Enhancement - add an API in the Files system field to
+            # delete all something like draft.files.delete_all(force=True).
+            keys = [file_key for file_key in draft.files]
+            for file_key in keys:
+                draft.files.delete(file_key)
+            # Note: Bucket.remove() does not actually remove the data files
+            # on disk. They have to be garbarge collected, since it's a
+            # possibility that the physical file on disk is used linked in
+            # other buckets
+            draft.bucket = None
+            draft.bucket_id = None
+            bucket.remove()
+
 
 class DraftMetadataComponent(MetadataComponent):
     """Service component for draft metadata integration."""

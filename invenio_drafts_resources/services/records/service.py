@@ -293,15 +293,17 @@ class RecordDraftService(RecordService):
         except NoResultFound:
             record = None
 
-        # Run components
-        for component in self.components:
-            if hasattr(component, 'delete_draft'):
-                component.delete_draft(identity, draft=draft, record=record)
-
         # We soft-delete a draft when a published record exists, in order to
         # keep the version_id counter around for optimistic concurrency
         # control (both for ES indexing and for REST API clients)
         force = False if record else True
+
+        # Run components
+        for component in self.components:
+            if hasattr(component, 'delete_draft'):
+                component.delete_draft(
+                    identity, draft=draft, record=record, force=force)
+
         draft.delete(force=force)
         db.session.commit()
         self.indexer.delete(draft)
