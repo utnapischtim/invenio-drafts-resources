@@ -11,7 +11,7 @@
 
 from invenio_records_resources.services import RecordServiceConfig
 
-from .components import DraftMetadataComponent
+from .components import DraftMetadataComponent, PIDComponent
 from .permissions import RecordDraftPermissionPolicy
 from .schema import RecordSchema
 
@@ -29,4 +29,5 @@ class RecordDraftServiceConfig(RecordServiceConfig):
 
     components = [
         DraftMetadataComponent,
+        PIDComponent,
     ]

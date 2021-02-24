@@ -238,10 +238,6 @@ class RecordDraftService(RecordService):
             if hasattr(component, 'publish'):
                 component.publish(draft=draft, record=record)
 
-        # Register persistent identifiers if needed.
-        if not record.is_published:
-            record.register()
-
         record.commit()
         draft.delete()
         db.session.commit()  # Persist DB

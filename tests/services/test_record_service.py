@@ -15,12 +15,9 @@ Test to add:
 - Read with missing pid
 """
 
-import time
-
 import pytest
-from invenio_pidstore.errors import PIDDeletedError, PIDUnregistered
+from invenio_pidstore.errors import PIDDoesNotExistError, PIDUnregistered
 from invenio_pidstore.models import PIDStatus
-from invenio_search import current_search, current_search_client
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -123,7 +120,7 @@ def test_delete_draft(app, service, identity_simple, input_data):
     assert success
 
     # Check draft deletion
-    with pytest.raises(NoResultFound):
+    with pytest.raises(PIDDoesNotExistError):
         # NOTE: Draft and Record have the same `id`
         delete_draft = service.read_draft(draft.id, identity_simple)
 
