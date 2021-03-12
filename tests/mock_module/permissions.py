@@ -9,6 +9,8 @@ from invenio_drafts_resources.services.records.permissions import \
 class PermissionPolicy(RecordDraftPermissionPolicy):
     """Mock permission policy. All actions allowed."""
 
+    can_edit = [AnyUser()]
+    can_new_version = [AnyUser()]
     can_search = [AnyUser()]
     can_create = [AnyUser()]
     can_read = [AnyUser()]

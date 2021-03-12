@@ -7,7 +7,7 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""RecordDraft Service API."""
+"""Primary service for working with records and drafts."""
 
 from elasticsearch_dsl.query import Q
 from invenio_db import db
@@ -18,15 +18,10 @@ from .config import RecordDraftServiceConfig
 
 
 class RecordDraftService(RecordService):
-    """Draft Service interface.
+    """Record and draft service interface.
 
-    This service provides an interface to business logic for
-    published AND draft records. When creating a custom service
-    for a specialized record (e.g. authors), consider if you need
-    draft functionality or not. If you do, inherit from this service;
-    otherwise, inherit from the RecordService directly.
-
-    This service includes versioning.
+    This service provides an interface to business logic for published and
+    draft records.
     """
 
     default_config = RecordDraftServiceConfig
@@ -93,6 +88,7 @@ class RecordDraftService(RecordService):
         # Permissions
         self.require_permission(identity, "update_draft", record=draft)
 
+        # Load data with service schema
         data, errors = self.schema.load(
             identity,
             data,
@@ -109,6 +105,7 @@ class RecordDraftService(RecordService):
                 component.update_draft(
                     identity, record=draft, data=data)
 
+        # Commit and index
         draft.commit()
         db.session.commit()
         self.indexer.index(draft)
@@ -137,47 +134,27 @@ class RecordDraftService(RecordService):
     def edit(self, id_, identity, links_config=None):
         """Create a new revision or a draft for an existing record.
 
-        Note: Because of the workflow, this method does not accept data.
         :param id_: record PID value.
         """
-        self.require_permission(identity, "create")
-
         # Draft exists - return it
         try:
             draft = self.draft_cls.pid.resolve(id_, registered_only=False)
+            self.require_permission(identity, "edit", record=draft)
             return self.result_item(
                 self, identity, draft, links_config=links_config)
         except NoResultFound:
             pass
 
-        # Draft does not exists - so get the main record we want edit and
-        # create a draft by 1) either undeleting a soft-deleted draft or 2)
-        # create a new draft
+        # Draft does not exists - so get the main record we want to edit and
+        # create a draft from it
         record = self.record_cls.pid.resolve(id_)
-        try:
-            # We soft-delete a draft once it has been published, in order to
-            # keep the version_id counter around for optimistic concurrency
-            # control (both for ES indexing and for REST API clients)
-            draft = self.draft_cls.get_record(record.id, with_deleted=True)
-            if draft.is_deleted:
-                draft.undelete()
-                draft.update(**record)
-                draft.pid = record.pid
-                draft.fork_version_id = record.revision_id
-        except NoResultFound:
-            # If a draft was ever force deleted, then we will create the draft.
-            # This is a very exceptional case as normally, when we edit a
-            # record then the soft-deleted draft exists and we are in above
-            # case.
-            draft = self.draft_cls.create(
-                record, id_=record.id, fork_version_id=record.revision_id,
-                pid=record.pid,
-            )
+        self.require_permission(identity, "edit", record=record)
+        draft = self.draft_cls.edit(record)
 
         # Run components
         for component in self.components:
-            if hasattr(component, 'edit'):
-                component.edit(identity, draft=draft)
+            if hasattr(component, "edit"):
+                component.edit(identity, draft=draft, record=record)
 
         draft.commit()
         db.session.commit()
@@ -199,90 +176,79 @@ class RecordDraftService(RecordService):
               (drafts can be incomplete but only complete drafts can be turned
               into records)
             - Create or update associated (published) record with data
-
-        NOTE: This process of taking data from the database and validating it
-              back is tricky because there are a number of
-              data representations and transformations. There can be mistakes
-              within it as of writing. Don't take this flow as gospel yet.
         """
         self.require_permission(identity, "publish")
 
-        # Get data layer draft
+        # Get the draft
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
 
-        # Convert to service layer draft result item
-        draft_item = self.result_item(
-            self, identity, draft, links_config=None  # no need for links
-        )
-        # Convert to data projection i.e. draft result item's dict form. Since
-        # there are no "errors" bc projection is taken directly from
-        # DB, we can use draft_item.data. This dict form is what is
-        # serialized out/deserialized in so it "should" be valid input to load.
-        draft_data = draft_item.data
+        # Validate the draft strictly - since a draft can be saved with errors
+        # we do a strict validation here to make sure only valid drafts can be
+        # published.
+        self._validate_draft(identity, draft)
 
-        # Purely used for validation purposes although we may actually want to
-        # use it...
-        data, _ = self.schema.load(
-            identity,
-            data=draft_data,
-            pid=draft.pid,
-            record=draft,
-            raise_errors=True  # this is the default, but might as well be
-                               # explicit
-        )
-
-        # Set draft data in record
-        if draft.is_published:
-            record = self.record_cls.get_record(draft.id)
-            record.update_from(draft)
-        else:
-            # New record
-            record = self.record_cls.create_from(draft)
+        # Create the record from the draft
+        record = self.record_cls.publish(draft)
+        latest_id = draft.versions.latest_id
 
         # Run components
         for component in self.components:
             if hasattr(component, 'publish'):
-                component.publish(draft=draft, record=record)
+                component.publish(identity, draft=draft, record=record)
 
+        # Commit and index
         record.commit()
-        draft.delete()
-        db.session.commit()  # Persist DB
+        draft.delete(force=False)
+        db.session.commit()
         self.indexer.delete(draft)
         self.indexer.index(record)
+        if latest_id:
+            self._reindex_latest(latest_id)
 
         return self.result_item(
             self, identity, record, links_config=links_config)
 
     def new_version(self, id_, identity, links_config=None):
         """Create a new version of a record."""
-        self.require_permission(identity, "create")
-
-        # Get record
+        # Get the a record - i.e. you can only create a new version in case
+        # at least one published record already exists.
         record = self.record_cls.pid.resolve(id_)
 
-        # Create new draft
-        draft = self.draft_cls.create(
-            {},
-            conceptpid=record.conceptpid,
-            # TODO: Need to check if below line is correct?
-            fork_version_id=record.revision_id,
-        )
+        # Check permissions
+        self.require_permission(identity, "new_version", record=record)
+
+        # Draft for new version already exists? if so return it
+        if record.versions.next_draft_id:
+            next_draft = self.draft_cls.get_record(
+                record.versions.next_draft_id)
+            return self.result_item(
+                self, identity, next_draft, links_config=links_config)
+
+        # Draft for new version does not exists, so create it
+        next_draft = self.draft_cls.new_version(record)
+        # Get the latest published record if it's not the current one.
+        if not record.versions.is_latest:
+            record = self.record_cls.get_record(record.versions.latest_id)
 
         # Run components
         for component in self.components:
             if hasattr(component, 'new_version'):
-                component.new_version(identity, draft=draft, record=record)
+                component.new_version(
+                    identity, draft=next_draft, record=record)
 
-        draft.commit()
+        # Commit and index
+        next_draft.commit()
         db.session.commit()
-        self.indexer.index(draft)
+        self.indexer.index(next_draft)
+        self._reindex_latest(next_draft.versions.latest_id, record=record)
 
         return self.result_item(
-            self, identity, draft, links_config=links_config)
+            self, identity, next_draft, links_config=links_config)
 
     def delete_draft(self, id_, identity, revision_id=None):
         """Delete a record from database and search indexes."""
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
+        latest_id = draft.versions.latest_id
 
         self.check_revision_id(draft, revision_id)
 
@@ -306,16 +272,78 @@ class RecordDraftService(RecordService):
                 component.delete_draft(
                     identity, draft=draft, record=record, force=force)
 
+        # Note, the parent record deletion logic is implemented in the
+        # ParentField and will automatically take care of deleting the parent
+        # record in case this is the only draft that exists for the parent.
         draft.delete(force=force)
         db.session.commit()
+
         # We refresh the index because users are usually redirected to a
         # search result immediately after, and we don't want the users to see
         # their just deleted draft.
         self.indexer.delete(draft, refresh=True)
 
-        # Reindex the record to trigger update of computed values in the
-        # available dumpers
-        if record:
+        if force:
+            # Case 1: We deleted a new draft (without a published record) or a
+            # new version draft (without a published).
+            # In this case, we reindex the latest published record/draft
+            self._reindex_latest(latest_id, refresh=True)
+        else:
+            # Case 2: We deleted a draft for a published record.
+            # In this case we reindex just the published record to trigger and
+            # update of computed values.
             self.indexer.index(record, arguments={"refresh": True})
 
         return True
+
+    def _validate_draft(self, identity, draft):
+        """Validate a draft.
+
+        This method is internal because it works with a data access layer
+        draft, and thus should not be called from outside the service.
+        """
+        # Convert to draft into service layer draft result item (a record
+        # projection for the given identity). This way we can load and validate
+        # the data with the service schema.
+        draft_item = self.result_item(
+            self, identity, draft, links_config=None  # no need for links
+        )
+        # Validate the data - will raise ValidationError if not valid.
+        self.schema.load(
+            identity,
+            data=draft_item.data,
+            pid=draft.pid,
+            record=draft,
+            raise_errors=True  # this is the default, but might as well be
+                               # explicit
+        )
+
+    def _reindex_latest(self, latest_id, record=None, draft=None,
+                        refresh=False):
+        """Reindex the latest published record and draft.
+
+        This triggers and update of computed values in the index, such as
+        "is_latest".
+
+        This method is internal because it works with a data access layer
+        record/draft, and thus should not be called from outside the service.
+        """
+        arguments = {"refresh": True} if refresh else {}
+
+        # We only have a draft, no latest to index
+        if not latest_id:
+            return
+
+        # Note, the record may not be the latest published record, and we only
+        # want to index the latest published.
+        if record is None or latest_id != record.id:
+            record = self.record_cls.get_record(latest_id)
+        self.indexer.index(record, arguments=arguments)
+
+        # Note, a draft may or may not exists for a published record (depending
+        # on if it's being edited).
+        try:
+            draft = self.draft_cls.get_record(latest_id)
+            self.indexer.index(draft, arguments=arguments)
+        except NoResultFound:
+            pass

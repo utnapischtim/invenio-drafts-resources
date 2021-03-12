@@ -9,7 +9,9 @@
 """System fields."""
 
 from .parent import ParentField
+from .versions import VersionsField
 
 __all__ = (
     "ParentField",
+    "VersionsField",
 )

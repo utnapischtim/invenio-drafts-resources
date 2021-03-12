@@ -9,11 +9,13 @@
 """Drafts data access layer API."""
 
 from .api import Draft, Record
-from .models import DraftMetadataBase, ParentRecordMixin
+from .models import DraftMetadataBase, ParentRecordMixin, \
+    ParentRecordStateMixin
 
 __all__ = (
     "Draft",
     "DraftMetadataBase",
     "ParentRecordMixin",
+    "ParentRecordStateMixin",
     "Record",
 )

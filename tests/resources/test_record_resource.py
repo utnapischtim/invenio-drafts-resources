@@ -168,7 +168,7 @@ def test_create_publish_new_revision(client, headers, input_data, es_clear):
     response = client.post(f"/mocks/{recid}/draft", headers=headers)
 
     assert response.status_code == 201
-    assert response.json['revision_id'] == 4
+    assert response.json['revision_id'] == 5
     _assert_single_item_response(response)
 
     # Update that new draft
@@ -219,13 +219,13 @@ def test_mutiple_edit(client, headers, input_data, es_clear):
     response = client.post(f"/mocks/{recid}/draft", headers=headers)
 
     assert response.status_code == 201
-    assert response.json['revision_id'] == 4
+    assert response.json['revision_id'] == 5
 
     # Request a second edit. Get the same draft (revision_id)
     response = client.post(f"/mocks/{recid}/draft", headers=headers)
 
     assert response.status_code == 201
-    assert response.json['revision_id'] == 4
+    assert response.json['revision_id'] == 5
 
     # Publish it to check the increment in version_id
     response = client.post(
@@ -238,7 +238,7 @@ def test_mutiple_edit(client, headers, input_data, es_clear):
     response = client.post(f"/mocks/{recid}/draft", headers=headers)
 
     assert response.status_code == 201
-    assert response.json['revision_id'] == 7
+    assert response.json['revision_id'] == 8
 
 
 @pytest.mark.skip()  # Disable until properly implemented.

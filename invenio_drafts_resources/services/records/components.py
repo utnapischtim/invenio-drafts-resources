@@ -15,7 +15,7 @@ from invenio_records_resources.services.records.components import \
 class PIDComponent(ServiceComponent):
     """Service component for PID registraion."""
 
-    def publish(self, draft=None, record=None):
+    def publish(self, identity, draft=None, record=None):
         """Register persistent identifiers when publishing."""
         if not record.is_published:
             record.register()
@@ -32,8 +32,16 @@ class PIDComponent(ServiceComponent):
 class DraftFilesComponent(ServiceComponent):
     """Draft files service component."""
 
+    def edit(self, identity, draft=None, record=None):
+        """Edit callback."""
+        draft['files'] = record['files']
+
+    def new_version(self, identity, draft=None, record=None):
+        """New version callback."""
+        draft['files'] = record['files']
+
     # TODO: Add tests for publishing a draft with files
-    def publish(self, draft=None, record=None):
+    def publish(self, identity, draft=None, record=None):
         """Copy bucket and files to record."""
         draft_files = draft.files
         bucket = draft_files.bucket
@@ -95,8 +103,14 @@ class DraftMetadataComponent(MetadataComponent):
         """Update draft metadata."""
         record.metadata = data.get('metadata', {})
 
+    def publish(self, identity, draft=None, record=None, **kwargs):
+        """Update draft metadata."""
+        record.metadata = draft.get('metadata', {})
 
-class RelationsComponent(ServiceComponent):
-    """Service component for PID relations integration."""
+    def edit(self, identity, draft=None, record=None, **kwargs):
+        """Update draft metadata."""
+        draft.metadata = record.get('metadata', {})
 
-    # PIDNodeVersioning(pid=conceptrecid).insert_draft_child(child_pid=recid)
+    def new_version(self, identity, draft=None, record=None, **kwargs):
+        """Update draft metadata."""
+        draft.metadata = record.get('metadata', {})

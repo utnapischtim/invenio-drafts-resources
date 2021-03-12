@@ -28,20 +28,20 @@ from sqlalchemy.orm.exc import NoResultFound
 
 def test_create_draft(app, service, identity_simple, input_data):
     """Test draft creation of a non-existing record."""
-    # Needs `app` context because of invenio_access/permissions.py#166
     draft = service.create(identity_simple, input_data)
     draft_dict = draft.to_dict()
 
     assert draft.id
-    assert draft._record.revision_id == 1
 
     for key, value in input_data.items():
         assert draft[key] == value
 
     # Check for pid and parent pid
     assert draft['id']
-    assert draft._record.pid.status == PIDStatus.NEW
-    assert draft._record.parent.pid.status == PIDStatus.NEW
+    assert draft['parent']['id']
+    assert draft['is_published'] is False
+    assert draft['versions']['is_latest_draft'] is True
+    assert draft['versions']['is_latest'] is False
     assert 'errors' not in draft_dict
 
 
@@ -50,7 +50,6 @@ def test_create_empty_draft(app, service, identity_simple):
 
     Errors (missing required fields) are reported, but don't prevent creation.
     """
-    # Needs `app` context because of invenio_access/permissions.py#166
     input_data = {
         "metadata": {}
     }
@@ -59,13 +58,11 @@ def test_create_empty_draft(app, service, identity_simple):
     draft_dict = draft.to_dict()
 
     assert draft['id']
-    assert draft._record.pid.status == PIDStatus.NEW
-    assert draft._record.parent.pid.status == PIDStatus.NEW
+    assert draft['is_published'] is False
     assert draft_dict['errors'][0]['field'] == 'metadata.title'
 
 
 def test_read_draft(app, service, identity_simple, input_data):
-    # Needs `app` context because of invenio_access/permissions.py#166
     draft = service.create(identity_simple, input_data)
     assert draft.id
 
@@ -74,7 +71,6 @@ def test_read_draft(app, service, identity_simple, input_data):
 
 
 def test_update_draft(app, service, identity_simple, input_data):
-    # Needs `app` context because of invenio_access/permissions.py#166
     draft = service.create(identity_simple, input_data)
     assert draft.id
 
@@ -95,7 +91,6 @@ def test_update_draft(app, service, identity_simple, input_data):
 
 def test_update_draft_invalid_field(app, service, identity_simple, input_data):
     """Update with invalid field reports rather than raises errors."""
-    # Needs `app` context because of invenio_access/permissions.py#166
     draft = service.create(identity_simple, input_data)
     orig_title = input_data['metadata']['title']
     edited_title = 100
@@ -110,7 +105,6 @@ def test_update_draft_invalid_field(app, service, identity_simple, input_data):
 
 
 def test_delete_draft(app, service, identity_simple, input_data):
-    # Needs `app` context because of invenio_access/permissions.py#166
     draft = service.create(identity_simple, input_data)
     assert draft.id
 
@@ -213,7 +207,7 @@ def test_create_publish_new_revision(app, service, identity_simple,
     assert draft.id == recid
     assert draft._record.fork_version_id == record._record.revision_id
     # create, soft-delete, undelete, update
-    assert draft._record.revision_id == 4
+    assert draft._record.revision_id == 5
 
     # Update the content
     orig_title = input_data['metadata']['title']
@@ -251,12 +245,12 @@ def test_mutiple_edit(app, service, identity_simple, input_data):
     draft = service.edit(recid, identity_simple)
     assert draft.id == recid
     assert draft._record.fork_version_id == record._record.revision_id
-    assert draft._record.revision_id == 4
+    assert draft._record.revision_id == 5
 
     draft = service.edit(recid, identity_simple)
     assert draft.id == recid
     assert draft._record.fork_version_id == record._record.revision_id
-    assert draft._record.revision_id == 4
+    assert draft._record.revision_id == 5
 
     # Publish it to check the increment in version_id
     record = service.publish(recid, identity_simple)
@@ -264,24 +258,22 @@ def test_mutiple_edit(app, service, identity_simple, input_data):
     draft = service.edit(recid, identity_simple)
     assert draft.id == recid
     assert draft._record.fork_version_id == record._record.revision_id
-    assert draft._record.revision_id == 7  # soft-delete, undelete, update
+    assert draft._record.revision_id == 8  # soft-delete, undelete, update
 
 
-@pytest.mark.skip()  # Disable until properly implemented.
 def test_create_publish_new_version(app, service, identity_simple,
                                     input_data):
     """Test creating a new revision of a record.
 
     This tests the `new_version` service method.
     """
-    # Needs `app` context because of invenio_access/permissions.py#166
     record = _create_and_publish(service, input_data, identity_simple)
     recid = record.id
 
     # Create new version
     draft = service.new_version(recid, identity_simple)
 
-    assert draft._record.revision_id == 1
+    assert draft._record.revision_id == 2
     assert draft['id'] != record['id']
     assert draft._record.pid.status == PIDStatus.NEW
     assert draft._record.parent.pid.status == PIDStatus.REGISTERED
