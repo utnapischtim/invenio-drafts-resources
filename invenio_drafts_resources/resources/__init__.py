@@ -17,8 +17,6 @@ from .files import DraftFileActionResource, DraftFileActionResourceConfig, \
     RecordFileResourceConfig
 from .records import RecordResource, RecordResourceConfig, \
     RecordVersionsResource, RecordVersionsResourceConfig
-from .userrecords import UserRecordsResource
-from .userrecords_config import UserRecordsResourceConfig
 
 __all__ = (
     "DraftFileResourceConfig",
@@ -38,6 +36,4 @@ __all__ = (
     "RecordResourceConfig",
     "RecordVersionsResource",
     "RecordVersionsResourceConfig",
-    "UserRecordsResource",
-    "UserRecordsResourceConfig",
 )
