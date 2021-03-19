@@ -17,7 +17,6 @@ from invenio_records_resources.resources.actions import ActionResource
 
 from ...services import RecordDraftService
 from .config import DraftActionResourceConfig, DraftResourceConfig
-from .errors import ActionNotImplementedError
 
 
 class DraftResource(SingletonResource, ConfigLoaderMixin):
