@@ -9,15 +9,9 @@
 
 """Draft Services."""
 
-from .files import FileMetadataService, FileMetadataServiceConfig, \
-    FileService, FileServiceConfig
 from .records import RecordDraftService, RecordDraftServiceConfig
 
 __all__ = (
-    "FileMetadataService",
-    "FileMetadataServiceConfig",
-    "FileService",
-    "FileServiceConfig",
     "RecordDraftService",
     "RecordDraftServiceConfig",
 )
