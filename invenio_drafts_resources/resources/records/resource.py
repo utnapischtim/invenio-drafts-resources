@@ -17,6 +17,7 @@ from flask_resources.context import resource_requestctx
 from invenio_records_resources.config import ConfigLoaderMixin
 from invenio_records_resources.resources import \
     RecordResource as _RecordResource
+from invenio_records_resources.resources.records.utils import es_preference
 
 from invenio_drafts_resources.services.records import RecordDraftService
 
@@ -44,17 +45,8 @@ class RecordVersionsResource(CollectionResource, ConfigLoaderMixin):
 
     def __init__(self, service=None, config=None):
         """Constructor."""
-        super(RecordVersionsResource, self).__init__(
-            config=self.load_config(config))
+        super().__init__(config=self.load_config(config))
         self.service = service or RecordDraftService()
-
-    def _get_es_preference(self):
-        user_agent = request.headers.get('User-Agent', '')
-        ip = request.remote_addr
-        user_hash = f"{ip}-{user_agent}".encode('utf8')
-        alg = hashlib.md5()
-        alg.update(user_hash)
-        return alg.hexdigest()
 
     def search(self):
         """Perform a search over the record's versions.
@@ -67,7 +59,7 @@ class RecordVersionsResource(CollectionResource, ConfigLoaderMixin):
             identity=identity,
             params=resource_requestctx.url_args,
             links_config=self.config.links_config,
-            es_preference=self._get_es_preference()
+            es_preference=es_preference()
         )
         return hits.to_dict(), 200
 
