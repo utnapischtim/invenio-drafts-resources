@@ -15,7 +15,7 @@ from invenio_records_resources.resources import \
 from invenio_records_resources.resources.records.schemas_links import \
     ItemLinksSchema, SearchLinksSchema
 
-from ..drafts.schemas_links import DraftLinksSchema
+from ..drafts.config import DraftResourceConfig
 from .schemas_url_args import SearchURLArgsSchema
 
 
@@ -23,7 +23,7 @@ class RecordResourceConfig(_RecordResourceConfig):
     """Draft aware Record resource config."""
 
     draft_links_config = {
-        "record": DraftLinksSchema
+        "record": DraftResourceConfig.links_config["record"],
     }
 
     request_url_args_parser = {

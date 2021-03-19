@@ -9,7 +9,7 @@
 
 """Invenio Drafts Resources module to create REST APIs."""
 
-from flask import abort, g
+from flask import g
 from flask_resources import SingletonResource
 from flask_resources.context import resource_requestctx
 from invenio_records_resources.config import ConfigLoaderMixin

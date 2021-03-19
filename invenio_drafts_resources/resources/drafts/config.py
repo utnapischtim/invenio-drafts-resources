@@ -11,9 +11,8 @@
 
 from invenio_records_resources.resources import RecordResourceConfig
 from invenio_records_resources.resources.actions import ActionResourceConfig
-
-from ..records import RecordLinksSchema
-from .schemas_links import DraftLinksSchema
+from invenio_records_resources.resources.records.schemas_links import \
+    ItemLink, ItemLinksSchema
 
 
 class DraftResourceConfig(RecordResourceConfig):
@@ -23,7 +22,15 @@ class DraftResourceConfig(RecordResourceConfig):
     item_route = None
 
     links_config = {
-        "record": DraftLinksSchema
+        "record": ItemLinksSchema.create(links={
+            "self": ItemLink(
+                template="/api/records/{pid_value}/draft"
+            ),
+            "publish": ItemLink(
+                template="/api/records/{pid_value}/draft/actions/publish",
+                permission="publish",
+            ),
+        })
     }
 
 
@@ -40,5 +47,9 @@ class DraftActionResourceConfig(ActionResourceConfig):
     }
 
     record_links_config = {
-        "record": RecordLinksSchema
+        "record": ItemLinksSchema.create(links={
+            "self": ItemLink(
+                template="/api/records/{pid_value}"
+            ),
+        })
     }

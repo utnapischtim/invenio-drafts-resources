@@ -11,10 +11,8 @@
 
 from .config import RecordResourceConfig, RecordVersionsResourceConfig
 from .resource import RecordResource, RecordVersionsResource
-from .schemas_links import RecordLinksSchema
 
 __all__ = (
-    "RecordLinksSchema",
     "RecordResource",
     "RecordResourceConfig",
     "RecordVersionsResource",

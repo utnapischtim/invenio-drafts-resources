@@ -7,10 +7,10 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""Invenio Drafts Resources module to create REST APIs."""
+"""REST APIs for working with records, drafts and files."""
 
 from .drafts import DraftActionResource, DraftActionResourceConfig, \
-    DraftLinksSchema, DraftResource, DraftResourceConfig
+    DraftResource, DraftResourceConfig
 from .files import DraftFileActionResource, DraftFileActionResourceConfig, \
     DraftFileResource, DraftFileResourceConfig, RecordFileActionResource, \
     RecordFileActionResourceConfig, RecordFileResource, \
@@ -29,7 +29,6 @@ __all__ = (
     "RecordFileActionResource",
     "DraftActionResource",
     "DraftActionResourceConfig",
-    "DraftLinksSchema",
     "DraftResource",
     "DraftResourceConfig",
     "RecordResource",

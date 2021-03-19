@@ -11,12 +11,10 @@
 
 from .config import DraftActionResourceConfig, DraftResourceConfig
 from .resource import DraftActionResource, DraftResource
-from .schemas_links import DraftLinksSchema
 
 __all__ = (
     "DraftActionResource",
     "DraftActionResourceConfig",
-    "DraftLinksSchema",
     "DraftResource",
     "DraftResourceConfig",
 )
