@@ -20,31 +20,17 @@ from invenio_drafts_resources.resources import \
 from invenio_drafts_resources.resources import \
     DraftActionResourceConfig as DraftActionResourceConfigBase
 from invenio_drafts_resources.resources import \
-    DraftFileActionResource as DraftFileActionResourceBase
-from invenio_drafts_resources.resources import \
     DraftFileActionResourceConfig as DraftFileActionResourceConfigBase
-from invenio_drafts_resources.resources import \
-    DraftFileResource as DraftFileResourceBase
 from invenio_drafts_resources.resources import \
     DraftFileResourceConfig as DraftFileResourceConfigBase
 from invenio_drafts_resources.resources import \
-    DraftResource as DraftResourceBase
-from invenio_drafts_resources.resources import \
     DraftResourceConfig as DraftResourceConfigBase
-from invenio_drafts_resources.resources import \
-    RecordFileActionResource as RecordFileActionResourceBase
 from invenio_drafts_resources.resources import \
     RecordFileActionResourceConfig as RecordFileActionResourceConfigBase
 from invenio_drafts_resources.resources import \
-    RecordFileResource as RecordRecordFileResourceBase
-from invenio_drafts_resources.resources import \
     RecordFileResourceConfig as RecordFileResourceConfigBase
 from invenio_drafts_resources.resources import \
-    RecordResource as RecordResourceBase
-from invenio_drafts_resources.resources import \
     RecordResourceConfig as RecordResourceConfigBase
-from invenio_drafts_resources.resources import \
-    RecordVersionsResource as RecordVersionsResource
 from invenio_drafts_resources.resources import \
     RecordVersionsResourceConfig as RecordVersionsResourceConfigBase
 
@@ -66,9 +52,9 @@ class DraftLinksSchema(Schema):
     )
 
 
-##
+#
 # RECORDS
-##
+#
 class RecordResourceConfig(RecordResourceConfigBase):
     """Mock record resource configuration."""
 
@@ -86,12 +72,6 @@ class RecordResourceConfig(RecordResourceConfigBase):
     }
 
 
-class RecordResource(RecordResourceBase):
-    """Mock record resource."""
-
-    default_config = RecordResourceConfig
-
-
 class RecordFileResourceConfig(RecordFileResourceConfigBase):
     """Mock record file resource."""
 
@@ -99,22 +79,10 @@ class RecordFileResourceConfig(RecordFileResourceConfigBase):
     list_route = "/mocks/<pid_value>/files"
 
 
-class RecordFileResource(RecordRecordFileResourceBase):
-    """Mock record file resource config."""
-
-    default_config = RecordFileResourceConfig
-
-
 class RecordFileActionResourceConfig(RecordFileActionResourceConfigBase):
     """Mock record file resource."""
 
     list_route = "/mocks/<pid_value>/files/<key>/<action>"
-
-
-class RecordFileActionResource(RecordFileActionResourceBase):
-    """Mock record file resource config."""
-
-    default_config = RecordFileActionResourceConfig
 
 
 ##
@@ -129,12 +97,6 @@ class DraftResourceConfig(DraftResourceConfigBase):
         # TODO: Revisit naming for "record"?
         "record": DraftLinksSchema
     }
-
-
-class DraftResource(DraftResourceBase):
-    """Mock draft resource."""
-
-    default_config = DraftResourceConfig
 
 
 class DraftActionResourceConfig(DraftActionResourceConfigBase):
@@ -161,8 +123,6 @@ class DraftActionResourceConfig(DraftActionResourceConfigBase):
 class DraftActionResource(DraftActionResourceBase):
     """Mock draft action resource."""
 
-    default_config = DraftActionResourceConfig
-
     def create_command(self, action, operation):
         """Dummy handler."""
         return self._get_cmd_func(action, operation).to_dict(), 200
@@ -175,27 +135,15 @@ class DraftFileResourceConfig(DraftFileResourceConfigBase):
     list_route = "/mocks/<pid_value>/draft/files"
 
 
-class DraftFileResource(DraftFileResourceBase):
-    """Mock record file resource config."""
-
-    default_config = DraftFileResourceConfig
-
-
 class DraftFileActionResourceConfig(DraftFileActionResourceConfigBase):
     """Mock record file resource."""
 
     list_route = "/mocks/<pid_value>/draft/files/<key>/<action>"
 
 
-class DraftFileActionResource(DraftFileActionResourceBase):
-    """Mock record file resource config."""
-
-    default_config = DraftFileActionResourceConfig
-
-
-##
+#
 # VERSIONING
-##
+#
 class RecordVersionsResourceConfig(RecordVersionsResourceConfigBase):
     """Mock draft version resource configuration."""
 
@@ -208,9 +156,3 @@ class RecordVersionsResourceConfig(RecordVersionsResourceConfigBase):
         "search": SearchLinksSchema.create(
             template='/api/mocks/{pid_value}/versions{?params*}')
     }
-
-
-class RecordVersionsResource(RecordVersionsResource):
-    """Mock draft version resource."""
-
-    default_config = RecordVersionsResourceConfig

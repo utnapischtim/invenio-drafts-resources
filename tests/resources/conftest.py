@@ -15,58 +15,74 @@ fixtures are available.
 import pytest
 from flask_principal import Identity, Need, UserNeed
 from mock_module.resource import DraftActionResource, \
-    DraftFileActionResource, DraftFileResource, DraftResource, \
-    RecordFileActionResource, RecordFileResource, RecordResource, \
-    RecordVersionsResource
-from mock_module.service import Service
+    DraftActionResourceConfig, DraftFileActionResourceConfig, \
+    DraftFileResourceConfig, DraftResourceConfig, \
+    RecordFileActionResourceConfig, RecordFileResourceConfig, \
+    RecordResourceConfig, RecordVersionsResourceConfig
+from mock_module.service import ServiceConfig
+
+from invenio_drafts_resources.resources import DraftFileActionResource, \
+    DraftFileResource, DraftResource, RecordFileActionResource, \
+    RecordFileResource, RecordResource, RecordVersionsResource
+from invenio_drafts_resources.services.records import RecordDraftService
 
 
 @pytest.fixture(scope="module")
-def record_resource():
+def service(appctx):
+    """Service instance."""
+    return RecordDraftService(ServiceConfig)
+
+
+@pytest.fixture(scope="module")
+def record_resource(service):
     """Record resource."""
-    return RecordResource(service=Service())
+    return RecordResource(config=RecordResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def record_file_resource():
+def record_file_resource(service):
     """Record file resource."""
-    return RecordFileResource(service=Service())
+    return RecordFileResource(config=RecordFileResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def record_file_action_resource():
+def record_file_action_resource(service):
     """Record file action resource."""
-    return RecordFileActionResource(service=Service())
+    return RecordFileActionResource(
+        config=RecordFileActionResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def draft_resource():
+def draft_resource(service):
     """Draft resource."""
-    return DraftResource(service=Service())
+    return DraftResource(config=DraftResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def draft_action_resource():
+def draft_action_resource(service):
     """Draft action resource."""
-    return DraftActionResource(service=Service())
+    return DraftActionResource(
+        config=DraftActionResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def version_resource():
+def version_resource(service):
     """Draft version Resource."""
-    return RecordVersionsResource(service=Service())
+    return RecordVersionsResource(
+        config=RecordVersionsResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def draft_file_resource():
+def draft_file_resource(service):
     """Draft file resource."""
-    return DraftFileResource(service=Service())
+    return DraftFileResource(config=DraftFileResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
-def draft_file_action_resource():
+def draft_file_action_resource(service):
     """Draft file action resource."""
-    return DraftFileActionResource(service=Service())
+    return DraftFileActionResource(
+        config=DraftFileActionResourceConfig, service=service)
 
 
 @pytest.fixture(scope="module")
@@ -92,8 +108,6 @@ def base_app(
         draft_file_resource.as_blueprint('mock_draft_files'))
     base_app.register_blueprint(
         draft_file_action_resource.as_blueprint('mock_draft_files_action'))
-    # FIXME: Why is this commented out? Also in records-resources
-    # base_app.register_error_handler(HTTPException, handle_http_exception)
     yield base_app
 
 

@@ -12,22 +12,16 @@
 from flask import g
 from flask_resources import SingletonResource
 from flask_resources.context import resource_requestctx
-from invenio_records_resources.config import ConfigLoaderMixin
 from invenio_records_resources.resources.actions import ActionResource
 
-from ...services import RecordDraftService
-from .config import DraftActionResourceConfig, DraftResourceConfig
 
-
-class DraftResource(SingletonResource, ConfigLoaderMixin):
+class DraftResource(SingletonResource):
     """Draft resource."""
-
-    default_config = DraftResourceConfig
 
     def __init__(self, config=None, service=None):
         """Constructor."""
-        super(DraftResource, self).__init__(config=self.load_config(config))
-        self.service = service or RecordDraftService()
+        super().__init__(config=config)
+        self.service = service
 
     def read(self):
         """Edit a draft.
@@ -81,10 +75,13 @@ class DraftResource(SingletonResource, ConfigLoaderMixin):
         return None, 204
 
 
-class DraftActionResource(ActionResource, ConfigLoaderMixin):
+class DraftActionResource(ActionResource):
     """Draft action resource."""
 
-    default_config = DraftActionResourceConfig
+    def __init__(self, config=None, service=None):
+        """Constructor."""
+        super().__init__(config=config)
+        self.service = service
 
     def create_publish(self, action, operation):
         """Publish the draft."""
@@ -95,9 +92,3 @@ class DraftActionResource(ActionResource, ConfigLoaderMixin):
             links_config=self.config.record_links_config
         )
         return item.to_dict(), 202
-
-    def __init__(self, service=None, config=None):
-        """Constructor."""
-        super(DraftActionResource, self).__init__(
-            config=self.load_config(config))
-        self.service = service or RecordDraftService()

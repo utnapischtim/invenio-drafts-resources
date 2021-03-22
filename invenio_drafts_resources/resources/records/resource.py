@@ -9,26 +9,18 @@
 
 """Invenio Drafts Resources module to create REST APIs."""
 
-import hashlib
-
-from flask import g, request
+from flask import g
 from flask_resources import CollectionResource
 from flask_resources.context import resource_requestctx
-from invenio_records_resources.config import ConfigLoaderMixin
 from invenio_records_resources.resources import \
     RecordResource as _RecordResource
 from invenio_records_resources.resources.records.utils import es_preference
 
-from invenio_drafts_resources.services.records import RecordDraftService
-
-from .config import RecordResourceConfig, RecordVersionsResourceConfig
 from .errors import api_redirect
 
 
 class RecordResource(_RecordResource):
     """Draft-aware RecordResource."""
-
-    default_config = RecordResourceConfig
 
     def create(self):
         """Create an item."""
@@ -38,15 +30,13 @@ class RecordResource(_RecordResource):
         return item.to_dict(), 201
 
 
-class RecordVersionsResource(CollectionResource, ConfigLoaderMixin):
+class RecordVersionsResource(CollectionResource):
     """Record versions resource."""
-
-    default_config = RecordVersionsResourceConfig
 
     def __init__(self, service=None, config=None):
         """Constructor."""
-        super().__init__(config=self.load_config(config))
-        self.service = service or RecordDraftService()
+        super().__init__(config=config)
+        self.service = service
 
     def search(self):
         """Perform a search over the record's versions.

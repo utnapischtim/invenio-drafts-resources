@@ -16,9 +16,3 @@ class ServiceConfig(RecordDraftServiceConfig):
     record_cls = Record
     draft_cls = Draft
     search_cls = RecordsSearchV2
-
-
-class Service(RecordDraftService):
-    """Mock service."""
-
-    default_config = ServiceConfig

@@ -16,7 +16,6 @@ from invenio_records_resources.services.records.schema import \
     ServiceSchemaWrapper
 from sqlalchemy.orm.exc import NoResultFound
 
-from .config import RecordDraftServiceConfig
 from .results import VersionsList
 
 
@@ -26,8 +25,6 @@ class RecordDraftService(RecordService):
     This service provides an interface to business logic for published and
     draft records.
     """
-
-    default_config = RecordDraftServiceConfig
 
     @property
     def schema_parent(self):
