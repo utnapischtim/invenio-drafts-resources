@@ -9,7 +9,6 @@
 
 """Invenio Drafts Resources module to create REST APIs."""
 
-from .ext import InvenioDraftsResources
 from .version import __version__
 
-__all__ = ("__version__", "InvenioDraftsResources")
+__all__ = ("__version__", )

@@ -6,7 +6,7 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""Records service copmonent base classes."""
+"""Records service component base classes."""
 
 from invenio_records_resources.services.records.components import \
     MetadataComponent, ServiceComponent

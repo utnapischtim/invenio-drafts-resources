@@ -7,12 +7,12 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""RecordDraft Services."""
+"""Record with draft service."""
 
-from .config import RecordDraftServiceConfig
-from .service import RecordDraftService
+from .config import RecordServiceConfig
+from .service import RecordService
 
 __all__ = (
-    'RecordDraftService',
-    'RecordDraftServiceConfig',
+    'RecordService',
+    'RecordServiceConfig',
 )

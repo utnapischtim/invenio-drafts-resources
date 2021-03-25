@@ -13,11 +13,6 @@ import json
 from flask_resources.errors import HTTPJSONException
 
 
-def api_redirect(location, code=301):
-    """Function to redirect to location by raising `RedirectException`."""
-    raise RedirectException(location, code=code)
-
-
 class RedirectException(HTTPJSONException):
     """Trigger a redirect to the latest record version.
 

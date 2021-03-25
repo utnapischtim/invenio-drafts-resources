@@ -86,13 +86,7 @@ setup(
     include_package_data=True,
     platforms="any",
     entry_points={
-        "invenio_base.apps": [
-            "invenio_drafts_resources = invenio_drafts_resources:InvenioDraftsResources",
-        ],
-        "invenio_base.api_apps": [
-            "invenio_drafts_resources = invenio_drafts_resources:InvenioDraftsResources",
-        ],
-        "invenio_i18n.translations": ["messages = invenio_drafts_resources",],
+        "invenio_i18n.translations": ["messages = invenio_drafts_resources"],
         'invenio_db.models': [
             'invenio_drafts_resources = invenio_drafts_resources.records.models',
         ],

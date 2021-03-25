@@ -18,7 +18,7 @@ from flask_principal import Identity, Need, UserNeed
 from mock_module.api import Draft
 from mock_module.service import ServiceConfig
 
-from invenio_drafts_resources.services.records import RecordDraftService
+from invenio_drafts_resources.services.records import RecordService
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,7 @@ def identity_simple():
 @pytest.fixture(scope="module")
 def service(appctx):
     """Service instance."""
-    return RecordDraftService(ServiceConfig)
+    return RecordService(ServiceConfig)
 
 
 @pytest.fixture()

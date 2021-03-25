@@ -9,5 +9,3 @@
 Configuration
 =============
 
-.. automodule:: invenio_drafts_resources.config
-   :members:

@@ -9,30 +9,9 @@
 
 """REST APIs for working with records, drafts and files."""
 
-from .drafts import DraftActionResource, DraftActionResourceConfig, \
-    DraftResource, DraftResourceConfig
-from .files import DraftFileActionResource, DraftFileActionResourceConfig, \
-    DraftFileResource, DraftFileResourceConfig, RecordFileActionResource, \
-    RecordFileActionResourceConfig, RecordFileResource, \
-    RecordFileResourceConfig
-from .records import RecordResource, RecordResourceConfig, \
-    RecordVersionsResource, RecordVersionsResourceConfig
+from .records import RecordResource, RecordResourceConfig
 
 __all__ = (
-    "DraftFileResourceConfig",
-    "DraftFileResource",
-    "DraftFileActionResourceConfig",
-    "DraftFileActionResource",
-    "RecordFileResourceConfig",
-    "RecordFileResource",
-    "RecordFileActionResourceConfig",
-    "RecordFileActionResource",
-    "DraftActionResource",
-    "DraftActionResourceConfig",
-    "DraftResource",
-    "DraftResourceConfig",
     "RecordResource",
     "RecordResourceConfig",
-    "RecordVersionsResource",
-    "RecordVersionsResourceConfig",
 )

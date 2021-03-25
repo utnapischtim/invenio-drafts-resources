@@ -57,6 +57,9 @@ class ParentRecord(RecordBase):
 class Record(RecordBase):
     """Record API."""
 
+    #: Class attribute to make it easy to check if record is a draft or not.
+    is_draft = False
+
     #
     # Configuration to be set by a subclass
     #
@@ -132,6 +135,9 @@ class Record(RecordBase):
 
 class Draft(Record):
     """Draft base API for metadata creation and manipulation."""
+
+    #: Class attribute to make it easy to check if record is a draft or not.
+    is_draft = True
 
     #
     # Configuration to be set by a subclass

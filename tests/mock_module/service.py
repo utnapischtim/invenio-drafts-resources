@@ -1,18 +1,40 @@
 """Example service."""
 
-from invenio_search import RecordsSearchV2
+from invenio_records_resources.services import ConditionalLink, RecordLink
 
-from invenio_drafts_resources.services import RecordDraftService, \
-    RecordDraftServiceConfig
+from invenio_drafts_resources.services import RecordServiceConfig
+from invenio_drafts_resources.services.records.config import is_draft, \
+    is_record
 
 from .api import Draft, Record
 from .permissions import PermissionPolicy
 
 
-class ServiceConfig(RecordDraftServiceConfig):
+class ServiceConfig(RecordServiceConfig):
     """Mock service configuration."""
 
     permission_policy_cls = PermissionPolicy
     record_cls = Record
     draft_cls = Draft
-    search_cls = RecordsSearchV2
+
+    links_item = {
+        "self": ConditionalLink(
+            cond=is_record,
+            if_=RecordLink("{+api}/mocks/{id}"),
+            else_=RecordLink("{+api}/mocks/{id}/draft"),
+        ),
+        "self_html": ConditionalLink(
+            cond=is_record,
+            if_=RecordLink("{+ui}/mocks/{id}"),
+            else_=RecordLink("{+ui}/uploads/{id}"),
+        ),
+        "latest": RecordLink("{+api}/mocks/{id}/versions/latest"),
+        "latest_html": RecordLink("{+ui}/mocks/{id}/latest"),
+        "draft": RecordLink("{+api}/mocks/{id}/draft", when=is_record),
+        "record": RecordLink("{+api}/mocks/{id}", when=is_draft),
+        "publish": RecordLink(
+            "{+api}/mocks/{id}/draft/actions/publish",
+            when=is_draft
+        ),
+        "versions": RecordLink("{+api}/mocks/{id}/versions"),
+    }

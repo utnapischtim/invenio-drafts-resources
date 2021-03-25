@@ -9,42 +9,25 @@
 
 """Draft aware Record Resource Config override."""
 
-from flask_resources.parsers import HeadersParser, URLArgsParser
 from invenio_records_resources.resources import \
-    RecordResourceConfig as _RecordResourceConfig
-from invenio_records_resources.resources.records.schemas_links import \
-    ItemLinksSchema, SearchLinksSchema
+    RecordResourceConfig as RecordResourceConfigBase
 
-from ..drafts.config import DraftResourceConfig
-from .schemas_url_args import SearchURLArgsSchema
+from .args import SearchRequestArgsSchema
 
 
-class RecordResourceConfig(_RecordResourceConfig):
+class RecordResourceConfig(RecordResourceConfigBase):
     """Draft aware Record resource config."""
 
-    draft_links_config = {
-        "record": DraftResourceConfig.links_config["record"],
+    url_prefix = ""
+
+    routes = {
+        "user-prefix": "/user",
+        "list": "",
+        "item": "/<pid_value>",
+        "item-versions": "/<pid_value>/versions",
+        "item-latest": "/<pid_value>/versions/latest",
+        "item-draft": "/<pid_value>/draft",
+        "item-publish": "/<pid_value>/draft/actions/publish",
     }
 
-    request_url_args_parser = {
-        "search": URLArgsParser(SearchURLArgsSchema)
-    }
-
-
-class RecordVersionsResourceConfig(RecordResourceConfig):
-    """Record resource version config."""
-
-    list_route = "/records/<pid_value>/versions"
-
-    item_route = "/records/<pid_value>/versions/latest"
-
-    links_config = {
-        "record": ItemLinksSchema.create(template='/api/records/{pid_value}'),
-        # TODO: fix search links schema to pass the <pid_value>
-        "search":  SearchLinksSchema.create(
-            template='/api/records/{pid_value}/versions{?params*}')
-    }
-
-    request_headers_parser = {
-        "search": HeadersParser(None),
-    }
+    request_args = SearchRequestArgsSchema

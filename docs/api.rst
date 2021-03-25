@@ -9,6 +9,3 @@
 
 API Docs
 ========
-
-.. automodule:: invenio_drafts_resources.ext
-   :members:

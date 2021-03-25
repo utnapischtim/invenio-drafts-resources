@@ -11,15 +11,14 @@
 
 from elasticsearch_dsl.query import Q
 from invenio_db import db
-from invenio_records_resources.services import RecordService
-from invenio_records_resources.services.records.schema import \
-    ServiceSchemaWrapper
+from invenio_records_resources.services import LinksTemplate
+from invenio_records_resources.services import \
+    RecordService as RecordServiceBase
+from invenio_records_resources.services import ServiceSchemaWrapper
 from sqlalchemy.orm.exc import NoResultFound
 
-from .results import VersionsList
 
-
-class RecordDraftService(RecordService):
+class RecordService(RecordServiceBase):
     """Record and draft service interface.
 
     This service provides an interface to business logic for published and
@@ -40,8 +39,8 @@ class RecordDraftService(RecordService):
     # High-level API
     # Inherits record search, read, create, delete and update
 
-    def search_drafts(self, identity, params=None, links_config=None,
-                      es_preference=None, **kwargs):
+    def search_drafts(self, identity, params=None, es_preference=None,
+                      **kwargs):
         """Search for drafts records matching the querystring."""
         self.require_permission(identity, 'search_drafts')
 
@@ -54,6 +53,7 @@ class RecordDraftService(RecordService):
             params,
             es_preference,
             record_cls=self.draft_cls,
+            search_opts=self.config.search_drafts,
             # `has_draft` systemfield is not defined here. This is not ideal
             # but it helps avoid overriding the method. See how is used in
             # https://github.com/inveniosoftware/invenio-rdm-records
@@ -67,10 +67,47 @@ class RecordDraftService(RecordService):
             identity,
             search_result,
             params,
-            links_config=links_config
+            links_tpl=LinksTemplate(self.config.links_search_drafts, context={
+                "args": params
+            }),
+            links_item_tpl=self.links_item_tpl,
         )
 
-    def read_draft(self, id_, identity, links_config=None):
+    def search_versions(self, id_, identity, params=None, es_preference=None,
+                        **kwargs):
+        """Search for record's versions."""
+        record = self.record_cls.pid.resolve(id_, registered_only=False)
+        self.require_permission(identity, "read", record=record)
+
+        # Prepare and execute the search
+        params = params or {}
+
+        search_result = self._search(
+            'search_versions',
+            identity,
+            params,
+            es_preference,
+            record_cls=self.record_cls,
+            search_opts=self.config.search_versions,
+            extra_filter=Q(
+                'term', **{'parent.id': str(record.parent.pid.pid_value)}),
+            permission_action='read',
+            **kwargs
+        ).execute()
+
+        return self.result_list(
+            self,
+            identity,
+            search_result,
+            params,
+            links_tpl=LinksTemplate(
+                self.config.links_search_versions,
+                context={"id": id_, "args": params}
+            ),
+            links_item_tpl=self.links_item_tpl,
+        )
+
+    def read_draft(self, id_, identity):
         """Retrieve a draft."""
         # Resolve and require permission
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
@@ -82,9 +119,9 @@ class RecordDraftService(RecordService):
                 component.read_draft(identity, draft=draft)
 
         return self.result_item(
-            self, identity, draft, links_config=links_config)
+            self, identity, draft, links_tpl=self.links_item_tpl)
 
-    def read_latest(self, id_, identity, links_config=None):
+    def read_latest(self, id_, identity):
         """Retrieve latest record."""
         # Resolve and require permission
         record = self.record_cls.pid.resolve(id_)
@@ -96,10 +133,9 @@ class RecordDraftService(RecordService):
         self.require_permission(identity, "read", record=record)
 
         return self.result_item(
-            self, identity, record, links_config=links_config)
+            self, identity, record, links_tpl=self.links_item_tpl)
 
-    def update_draft(self, id_, identity, data, links_config=None,
-                     revision_id=None):
+    def update_draft(self, id_, identity, data, revision_id=None):
         """Replace a draft."""
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
 
@@ -136,11 +172,11 @@ class RecordDraftService(RecordService):
             self,
             identity,
             draft,
-            links_config=links_config,
+            links_tpl=self.links_item_tpl,
             errors=errors
         )
 
-    def create(self, identity, data, links_config=None):
+    def create(self, identity, data):
         """Create a draft for a new record.
 
         It does NOT eagerly create the associated record.
@@ -149,11 +185,10 @@ class RecordDraftService(RecordService):
            self.draft_cls,
            identity,
            data,
-           links_config=links_config,
            raise_errors=False
         )
 
-    def edit(self, id_, identity, links_config=None):
+    def edit(self, id_, identity):
         """Create a new revision or a draft for an existing record.
 
         :param id_: record PID value.
@@ -163,7 +198,7 @@ class RecordDraftService(RecordService):
             draft = self.draft_cls.pid.resolve(id_, registered_only=False)
             self.require_permission(identity, "edit", record=draft)
             return self.result_item(
-                self, identity, draft, links_config=links_config)
+                self, identity, draft, links_tpl=self.links_item_tpl)
         except NoResultFound:
             pass
 
@@ -187,9 +222,9 @@ class RecordDraftService(RecordService):
         self.indexer.index(record)
 
         return self.result_item(
-            self, identity, draft, links_config=links_config)
+            self, identity, draft, links_tpl=self.links_item_tpl)
 
-    def publish(self, id_, identity, links_config=None):
+    def publish(self, id_, identity):
         """Publish a draft.
 
         Idea:
@@ -228,9 +263,9 @@ class RecordDraftService(RecordService):
             self._reindex_latest(latest_id)
 
         return self.result_item(
-            self, identity, record, links_config=links_config)
+            self, identity, record, links_tpl=self.links_item_tpl)
 
-    def new_version(self, id_, identity, links_config=None):
+    def new_version(self, id_, identity):
         """Create a new version of a record."""
         # Get the a record - i.e. you can only create a new version in case
         # at least one published record already exists.
@@ -244,7 +279,7 @@ class RecordDraftService(RecordService):
             next_draft = self.draft_cls.get_record(
                 record.versions.next_draft_id)
             return self.result_item(
-                self, identity, next_draft, links_config=links_config)
+                self, identity, next_draft, links_tpl=self.links_item_tpl)
 
         # Draft for new version does not exists, so create it
         next_draft = self.draft_cls.new_version(record)
@@ -265,49 +300,7 @@ class RecordDraftService(RecordService):
         self._reindex_latest(next_draft.versions.latest_id, record=record)
 
         return self.result_item(
-            self, identity, next_draft, links_config=links_config)
-
-    def search_versions(self, id_, identity, params=None, links_config=None,
-                        es_preference=None, **kwargs):
-        """Search for record's versions."""
-        record = self.record_cls.pid.resolve(id_, registered_only=False)
-        self.require_permission(identity, "read", record=record)
-
-        # Prepare and execute the search
-        params = params or {}
-
-        search_result = self._search(
-            'search_versions',
-            identity,
-            params,
-            es_preference,
-            record_cls=self.record_cls,
-            extra_filter=Q(
-                'match', **{'parent.id': str(record.parent.pid.pid_value)}),
-            permission_action='read',
-            **kwargs
-        ).execute()
-
-        # NOTE: This illustrates some of the entangled code parts:
-        #       the same schema_search_links is used for all
-        #       self.result_list in this service, but actually this class
-        #       needs different schema_search_links (or schema_item_links)
-        #       for published records/drafts/versions...
-        #       The solution, so far, has been to create a new service
-        #       with a different configuration, but that service inherits from
-        #       this service. So this class doesn't have a semantic core: can't
-        #       look at it and associate a single config to get an idea
-        #       of what it does. Different methods assume a different
-        #       config! So we have to resort to hacking in a different
-        #       result_list just for this case.
-        return VersionsList(
-            self,
-            identity,
-            search_result,
-            params,
-            links_config=links_config,
-            pid_value=id_
-        )
+            self, identity, next_draft, links_tpl=self.links_item_tpl)
 
     def delete_draft(self, id_, identity, revision_id=None):
         """Delete a record from database and search indexes."""
@@ -383,9 +376,7 @@ class RecordDraftService(RecordService):
         # Convert to draft into service layer draft result item (a record
         # projection for the given identity). This way we can load and validate
         # the data with the service schema.
-        draft_item = self.result_item(
-            self, identity, draft, links_config=None  # no need for links
-        )
+        draft_item = self.result_item(self, identity, draft)
         # Validate the data - will raise ValidationError if not valid.
         self.schema.load(
             data=draft_item.data,

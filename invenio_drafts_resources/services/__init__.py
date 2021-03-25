@@ -9,9 +9,9 @@
 
 """Draft Services."""
 
-from .records import RecordDraftService, RecordDraftServiceConfig
+from .records import RecordService, RecordServiceConfig
 
 __all__ = (
-    "RecordDraftService",
-    "RecordDraftServiceConfig",
+    "RecordService",
+    "RecordServiceConfig",
 )

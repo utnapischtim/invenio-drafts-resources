@@ -7,9 +7,10 @@
 # modify it under the terms of the MIT License; see LICENSE file for more
 # details.
 
-"""Invenio Drafts Resources module to create REST APIs"""
+"""Invenio Drafts Resources module to create REST APIs."""
 
 import pytest
+from mock_module.api import Record
 
 
 def _assert_single_item_response(response):
@@ -135,22 +136,14 @@ def test_publish_draft(client, headers, input_data, es_clear):
     _assert_single_item_response(response)
 
 
-def test_action_not_configured(client, headers, es_clear):
-    """Tests a non configured action call."""
-    # NOTE: recid can be dummy since it won't reach pass the resource view
-    response = client.post(
-        "/mocks/1234-abcd/draft/actions/non-configured", headers=headers
-    )
-    assert response.status_code == 404
+def test_search_versions(client, headers, input_data, es_clear):
+    """Test search for versions."""
+    recid = _create_and_publish(client, headers, input_data)
+    Record.index.refresh()
 
-
-def test_command_not_implemented(client, headers, es_clear):
-    """Tests a configured action without implemented function."""
-    # NOTE: recid can be dummy since it won't reach pass the resource view
-    response = client.post(
-        "/mocks/1234-abcd/draft/actions/command", headers=headers
-    )
-    assert response.status_code == 500
+    # Check draft does not exists anymore
+    res = client.get(f"/mocks/{recid}/versions", headers=headers)
+    assert res.status_code == 200
 
 
 #
@@ -212,7 +205,6 @@ def test_mutiple_edit(client, headers, input_data, es_clear):
 
     This tests the `edit` service method.
     """
-    # Needs `app` context because of invenio_access/permissions.py#166
     recid = _create_and_publish(client, headers, input_data)
 
     # Create new draft of said record

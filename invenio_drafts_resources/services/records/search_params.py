@@ -9,6 +9,8 @@
 
 """Sort parameter interpreter API."""
 
+from functools import partial
+
 from invenio_records_resources.services.records.params.base import \
     ParamInterpreter
 
@@ -16,11 +18,18 @@ from invenio_records_resources.services.records.params.base import \
 class AllVersionsParam(ParamInterpreter):
     """Evaluates the 'allversions' parameter."""
 
+    def __init__(self, field_name, config):
+        """Construct."""
+        self.field_name = field_name
+        super().__init__(config)
+
+    @classmethod
+    def factory(cls, field):
+        """Create a new filter parameter."""
+        return partial(cls, field)
+
     def apply(self, identity, search, params):
         """Evaluate the allversions parameter on the search."""
         if not params.get("allversions"):
-            search = search.filter('term', versions__is_latest=True)
-
-        # else all versions are returned
-
+            search = search.filter('term', **{self.field_name: True})
         return search

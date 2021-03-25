@@ -3,10 +3,10 @@
 from invenio_records_permissions.generators import AnyUser
 
 from invenio_drafts_resources.services.records.permissions import \
-    RecordDraftPermissionPolicy
+    RecordPermissionPolicy
 
 
-class PermissionPolicy(RecordDraftPermissionPolicy):
+class PermissionPolicy(RecordPermissionPolicy):
     """Mock permission policy. All actions allowed."""
 
     can_edit = [AnyUser()]

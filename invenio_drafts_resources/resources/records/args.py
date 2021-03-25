@@ -10,12 +10,12 @@
 """Schemas for parameter parsing."""
 
 
-from invenio_records_resources.resources.records.schemas_url_args import \
-    SearchURLArgsSchema as _SearchURLArgsSchema
+from invenio_records_resources.resources.records.args import \
+    SearchRequestArgsSchema as SearchRequestArgsSchemaBase
 from marshmallow import fields
 
 
-class SearchURLArgsSchema(_SearchURLArgsSchema):
-    """Schema for search URL args."""
+class SearchRequestArgsSchema(SearchRequestArgsSchemaBase):
+    """Extend schema with all versions field."""
 
     allversions = fields.Boolean()
