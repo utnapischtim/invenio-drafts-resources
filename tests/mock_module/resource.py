@@ -31,9 +31,6 @@ class FileResourceConfig(FileResourceConfigBase):
     blueprint_name = "mocks_files"
     url_prefix = "/mocks/<pid_value>"
 
-    item_route = "/mocks/<pid_value>/files/<key>"
-    list_route = "/mocks/<pid_value>/files"
-
 
 class DraftFileResourceConfig(FileResourceConfigBase):
     """Mock record file resource."""
