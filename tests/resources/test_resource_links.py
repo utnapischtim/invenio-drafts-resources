@@ -26,8 +26,8 @@ def input_data():
 
 def assert_expected_links(pid_value, links):
     expected_links = {
-        "self": f"https://localhost:5000/api/mocks/{pid_value}/draft",
-        "publish": f"https://localhost:5000/api/mocks/{pid_value}/draft/actions/publish",  # noqa
+        "self": f"https://127.0.0.1:5000/api/mocks/{pid_value}/draft",
+        "publish": f"https://127.0.0.1:5000/api/mocks/{pid_value}/draft/actions/publish",  # noqa
     }
 
     for key, link in expected_links.items():
@@ -77,7 +77,7 @@ def test_publish_draft(client, headers, input_data):
     assert response.status_code == 202
     links = response.json["links"]
     expected_links = {
-        "self": f"https://localhost:5000/api/mocks/{pid_value}",
+        "self": f"https://127.0.0.1:5000/api/mocks/{pid_value}",
         # TODO: Add files, delete...
     }
     for key, link in expected_links.items():
