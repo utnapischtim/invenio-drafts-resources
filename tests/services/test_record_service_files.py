@@ -256,6 +256,76 @@ def test_import_files_disabled(app, service, input_data, identity_simple):
 
 
 #
+# Default preview
+#
+def test_edit_publish_default_preview(
+        app, service, input_data, identity_simple):
+    """Test edit and publish."""
+    # Create, publish and edit draft.
+    draft = service.create(identity_simple, input_data)
+    add_file_to_draft(service.draft_files, draft.id, 'test', identity_simple)
+    record = service.publish(draft.id, identity_simple)
+    draft = service.edit(record.id, identity_simple)
+    assert 'default_preview' not in draft.data['files']
+
+    # Set the default preview
+    data = draft.to_dict()
+    data['files']['default_preview'] = 'test'
+    draft = service.update_draft(draft.id, identity_simple, data)
+    # TODO: fails because it needs schema to load the value.
+    assert draft.data['files']['default_preview'] == 'test'
+
+    # Publish change
+    record = service.publish(draft.id, identity_simple)
+    assert record.data['files']['default_preview'] == 'test'
+
+
+def test_update_draft_set_default_file_preview(
+        app, location, service, identity_simple, input_data):
+    default_file = 'file.txt'
+
+    # Create and add file
+    draft = service.create(identity_simple, input_data)
+    add_file_to_draft(
+        service.draft_files, draft.id, default_file, identity_simple)
+
+    # Update draft to set default preview
+    input_data["files"] = {
+        "enabled": True,
+        "default_preview": default_file
+    }
+    draft = service.update_draft(draft.id, identity_simple, input_data)
+
+    # Default preview should have been updated
+    assert draft.data["files"] == {
+        "enabled": True,
+        "default_preview": default_file
+    }
+    assert default_file == draft._record.files.default_preview
+
+
+def test_update_draft_set_default_file_preview_reports_error(
+        app, location, service,  identity_simple, input_data):
+    # Create and add file
+    draft = service.create(identity_simple, input_data)
+    default_file = 'file.txt'
+    add_file_to_draft(
+        service.draft_files, draft.id, default_file, identity_simple)
+
+    # Fail to set default preview to invalid file
+    input_data["files"] = {
+        "enabled": True,
+        "default_preview": "inexisting_file.txt"
+    }
+    draft = service.update_draft(draft.id, identity_simple, input_data)
+
+    # Default preview should NOT be set
+    assert draft.errors[0]['field'] == 'files.default_preview'
+    assert draft.errors[0]['messages']
+    assert draft.data["files"] == {"enabled": True}
+
+
+#
 # Files validation tests
 #
 def test_missing_files(app, service, identity_simple, input_data):
