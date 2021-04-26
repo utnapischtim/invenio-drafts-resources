@@ -25,12 +25,33 @@ class RecordService(RecordServiceBase):
     draft records.
     """
 
+    def __init__(self, config, files_service=None, draft_files_service=None):
+        """Constructor for RecordService."""
+        super().__init__(config)
+        self._files = files_service
+        self._draft_files = draft_files_service
+
+    #
+    # Subservices
+    #
+    @property
+    def files(self):
+        """Record files service."""
+        return self._files
+
+    @property
+    def draft_files(self):
+        """Draft files service."""
+        return self._draft_files
+
+    #
+    # Properties
+    #
     @property
     def schema_parent(self):
         """Schema for parent records."""
         return ServiceSchemaWrapper(self, schema=self.config.schema_parent)
 
-    # Draft attrs
     @property
     def draft_cls(self):
         """Factory for creating a record class."""
@@ -356,6 +377,38 @@ class RecordService(RecordServiceBase):
             self.indexer.index(record, arguments={"refresh": True})
 
         return True
+
+    def import_files(self, id_, identity):
+        """Import files from previous record version."""
+        if self.draft_files is None:
+            raise RuntimeError("Files support is not enabled.")
+
+        # Read draft
+        draft = self.draft_cls.pid.resolve(id_, registered_only=False)
+        self.require_permission(identity, "draft_create_files", record=draft)
+
+        # Retrieve latest record
+        record = self.record_cls.get_record(draft.versions.latest_id)
+        self.require_permission(identity, "read_files", record=record)
+
+        # Run components
+        for component in self.components:
+            if hasattr(component, 'import_files'):
+                component.import_files(identity, draft=draft, record=record)
+
+        # Commit and index
+        draft.commit()
+        db.session.commit()
+        self.indexer.index(draft)
+
+        return self.draft_files.file_result_list(
+            self.draft_files,
+            identity,
+            results=draft.files.values(),
+            record=draft,
+            links_tpl=self.draft_files.file_links_list_tpl(id_),
+            links_item_tpl=self.draft_files.file_links_item_tpl(id_),
+        )
 
     def rebuild_index(self, identity):
         """Reindex all records and drafts.

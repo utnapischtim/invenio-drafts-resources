@@ -23,3 +23,6 @@ class PermissionPolicy(RecordPermissionPolicy):
     can_create_files = [AnyUser()]
     can_read_files = [AnyUser()]
     can_update_files = [AnyUser()]
+    can_draft_create_files = [AnyUser()]
+    can_draft_read_files = [AnyUser()]
+    can_draft_update_files = [AnyUser()]

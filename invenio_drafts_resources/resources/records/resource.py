@@ -11,8 +11,8 @@
 
 import marshmallow as ma
 from flask import g
-from flask_resources import resource_requestctx, response_handler, route
-from flask_resources.parsers.decorators import request_parser
+from flask_resources import JSONSerializer, ResponseHandler, \
+    resource_requestctx, response_handler, route, with_content_negotiation
 from invenio_records_resources.resources import \
     RecordResource as RecordResourceBase
 from invenio_records_resources.resources.records.resource import \
@@ -46,7 +46,7 @@ class RecordResource(RecordResourceBase):
             """Suffix a route with the URL prefix."""
             return f"{route}{self.config.url_prefix}"
 
-        return [
+        rules = [
             route("GET", p(routes["list"]), self.search),
             route("POST", p(routes["list"]), self.create),
             route("GET", p(routes["item"]), self.read),
@@ -62,6 +62,16 @@ class RecordResource(RecordResourceBase):
             route("POST", p(routes["item-publish"]), self.publish),
             route("GET", s(routes["user-prefix"]), self.search_user_records),
         ]
+
+        if self.service.draft_files:
+            rules.append(route(
+                "POST",
+                p(routes["item-files-import"]),
+                self.import_files,
+                apply_decorators=False
+            ))
+
+        return rules
 
     @request_search_args
     @request_view_args
@@ -129,6 +139,22 @@ class RecordResource(RecordResourceBase):
             g.identity,
         )
         return item.to_dict(), 202
+
+    @request_view_args
+    @with_content_negotiation(
+        response_handlers={
+            'application/json': ResponseHandler(JSONSerializer())
+        },
+        default_accept_mimetype='application/json',
+    )
+    @response_handler(many=True)
+    def import_files(self):
+        """Import files from previous record version."""
+        files = self.service.import_files(
+            resource_requestctx.view_args["pid_value"],
+            g.identity,
+        )
+        return files.to_dict(), 201
 
     @request_view_args
     def read_latest(self):

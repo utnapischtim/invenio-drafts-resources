@@ -109,45 +109,6 @@ def test_update_draft_invalid_field(app, service, identity_simple, input_data):
     assert updated_draft_dict['errors'][0]['field'] == 'metadata.title'
 
 
-def add_file_to_draft(file_service, draft_id, file_id, identity):
-    """Add a file to the record."""
-    file_service.init_files(draft_id, identity, data=[{'key': file_id}])
-    file_service.set_file_content(
-        draft_id, file_id, identity, BytesIO(b'test file content')
-    )
-    result = file_service.commit_file(draft_id, file_id, identity)
-    return result
-
-
-def test_update_draft_files_enabled_error_cases(
-        app, service, file_service, identity_simple, input_data):
-    # Test files.enabled = True when no files
-    draft = service.create(identity_simple, input_data)
-    input_data["files"] = {"enabled": True}
-
-    updated_draft = service.update_draft(draft.id, identity_simple, input_data)
-
-    updated_draft_dict = updated_draft.to_dict()
-    assert updated_draft_dict['errors'][0]['field'] == 'files.enabled'
-    files_missing_msg = updated_draft_dict['errors'][0]['messages']
-    assert files_missing_msg is not None
-    assert updated_draft_dict["files"]["enabled"] is True
-
-    # Test setting files.enabled = False when files present
-    input_data["files"] = {"enabled": True}
-    draft = service.create(identity_simple, input_data)
-    add_file_to_draft(file_service, draft.id, "file.txt", identity_simple)
-    input_data["files"] = {"enabled": False}
-
-    updated_draft = service.update_draft(draft.id, identity_simple, input_data)
-
-    updated_draft_dict = updated_draft.to_dict()
-    assert updated_draft_dict['errors'][0]['field'] == 'files.enabled'
-    files_present_msg = updated_draft_dict['errors'][0]['messages']
-    assert files_present_msg != files_missing_msg
-    assert updated_draft_dict["files"]["enabled"] is True
-
-
 def test_delete_draft(app, service, identity_simple, input_data):
     draft = service.create(identity_simple, input_data)
     assert draft.id
@@ -216,31 +177,6 @@ def test_fail_to_publish_invalid_draft(app, service, identity_simple):
     # Test no published record exists
     with pytest.raises(PIDUnregistered) as e:
         record = service.read(draft.id, identity_simple)
-
-
-def test_fail_to_publish_draft_with_no_files(
-        app, service, file_service, identity_simple, input_data):
-    input_data["files"] = {"enabled": True}
-    draft = service.create(identity_simple, input_data)
-
-    with pytest.raises(ValidationError) as e:
-        service.publish(draft.id, identity_simple)
-
-    assert e.value.field_name == 'files.enabled'
-    files_missing_msg = e.value.messages
-    assert files_missing_msg is not None
-
-
-def test_fail_to_add_files_to_draft_with_files_disabled(
-        app, service, file_service, identity_simple, input_data):
-    # NOTE: It is impossible to publish a draft with files but
-    #       files.enabled = False, because can't set files.enabled = False
-    #       in that case (as seen in test above) and files can't be
-    #       added if files.enabled = False as we confirm below:
-    draft = service.create(identity_simple, input_data)
-
-    with pytest.raises(InvalidOperationError):
-        add_file_to_draft(file_service, draft.id, "file.txt", identity_simple)
 
 
 #

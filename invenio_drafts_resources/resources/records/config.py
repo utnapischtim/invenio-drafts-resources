@@ -28,6 +28,7 @@ class RecordResourceConfig(RecordResourceConfigBase):
         "item-latest": "/<pid_value>/versions/latest",
         "item-draft": "/<pid_value>/draft",
         "item-publish": "/<pid_value>/draft/actions/publish",
+        "item-files-import": "/<pid_value>/draft/actions/files-import",
     }
 
     request_args = SearchRequestArgsSchema

@@ -55,15 +55,14 @@ class ServiceConfig(RecordServiceConfig):
 class FileServiceConfig(BaseFileServiceConfig):
     """File service configuration."""
 
+    allow_upload = False
     permission_policy_cls = PermissionPolicy
+    record_cls = Record
+
+
+class DraftFileServiceConfig(BaseFileServiceConfig):
+    """File service configuration."""
+
+    permission_policy_cls = PermissionPolicy
+    permission_action_prefix = "draft_"
     record_cls = Draft
-
-    # file_links_list = {
-    #     "self": RecordLink("{+api}/mocks/{id}/files"),
-    # }
-
-    # file_links_item = {
-    #     "self": FileLink("{+api}/mocks/{id}/files/{key}"),
-    #     "content": FileLink("{+api}/mocks/{id}/files/{key}/content"),
-    #     "commit": FileLink("{+api}/mocks/{id}/files/{key}/commit"),
-    # }

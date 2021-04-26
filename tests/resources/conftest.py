@@ -13,7 +13,6 @@ fixtures are available.
 """
 
 import pytest
-from flask_principal import Identity, Need, UserNeed
 from invenio_records_resources.resources import FileResource
 from mock_module.resource import DraftFileResourceConfig, FileResourceConfig, \
     RecordResourceConfig
@@ -24,9 +23,13 @@ from invenio_drafts_resources.services.records import RecordService
 
 
 @pytest.fixture(scope="module")
-def service(appctx):
+def service(file_service, draft_file_service):
     """Service instance."""
-    return RecordService(ServiceConfig)
+    return RecordService(
+        ServiceConfig,
+        files_service=file_service,
+        draft_files_service=draft_file_service
+    )
 
 
 @pytest.fixture(scope="module")
@@ -36,15 +39,16 @@ def record_resource(service):
 
 
 @pytest.fixture(scope="module")
-def file_resource(service):
+def file_resource(file_service):
     """File resource."""
-    return FileResource(config=FileResourceConfig, service=service)
+    return FileResource(config=FileResourceConfig, service=file_service)
 
 
 @pytest.fixture(scope="module")
-def draft_file_resource(service):
+def draft_file_resource(draft_file_service):
     """Draft file resource."""
-    return FileResource(config=DraftFileResourceConfig, service=service)
+    return FileResource(
+        config=DraftFileResourceConfig, service=draft_file_service)
 
 
 @pytest.fixture(scope="module")
@@ -57,16 +61,7 @@ def base_app(
     yield base_app
 
 
-@pytest.fixture(scope="module")
-def identity_simple():
-    """Simple identity fixture."""
-    i = Identity(1)
-    i.provides.add(UserNeed(1))
-    i.provides.add(Need(method='system_role', value='any_user'))
-    return i
-
-
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def headers():
     """Default headers for making requests."""
     return {

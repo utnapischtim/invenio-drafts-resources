@@ -49,7 +49,14 @@ class Record(RecordBase):
         search_alias='draftsresources-records'
     )
 
-    files = FilesField(store=False, file_cls=FileRecord)
+    files = FilesField(
+        store=False,
+        file_cls=FileRecord,
+        # Don't create
+        create=False,
+        # Don't delete, we'll manage in the service
+        delete=False,
+    )
 
     bucket_id = ModelField(dump=False)
 

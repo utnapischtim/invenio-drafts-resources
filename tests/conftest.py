@@ -13,7 +13,10 @@ fixtures are available.
 """
 
 import pytest
+from flask_principal import Identity, Need, UserNeed
 from invenio_app.factory import create_api as _create_api
+from invenio_records_resources.services.files import FileService
+from mock_module.service import DraftFileServiceConfig, FileServiceConfig
 
 pytest_plugins = ("celery.contrib.pytest", )
 
@@ -54,3 +57,24 @@ def input_data():
             'enabled': False
         }
     }
+
+
+@pytest.fixture(scope="module")
+def file_service():
+    """File service fixture."""
+    return FileService(FileServiceConfig)
+
+
+@pytest.fixture(scope="module")
+def draft_file_service():
+    """File service fixture."""
+    return FileService(DraftFileServiceConfig)
+
+
+@pytest.fixture()
+def identity_simple():
+    """Simple identity fixture."""
+    i = Identity(1)
+    i.provides.add(UserNeed(1))
+    i.provides.add(Need(method='system_role', value='any_user'))
+    return i
