@@ -59,8 +59,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "invenio-records-resources>=0.16.4,<0.17.0",
-    "Flask>=1.1,<2.0",  # FIXME: remove when dependency resolving is fixed
+    "invenio-records-resources>=0.16.7,<0.17.0",
 ]
 
 packages = find_packages()
