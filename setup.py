@@ -59,7 +59,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "invenio-records-resources>=0.16.7,<0.17.0",
+    "invenio-records-resources>=0.16.9,<0.17.0",
 ]
 
 packages = find_packages()
