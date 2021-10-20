@@ -17,14 +17,14 @@ readme = open("README.rst").read()
 history = open("CHANGES.rst").read()
 
 tests_require = [
-    "pytest-invenio>=1.4.1",
-    "invenio-app>=1.3.0",
+    "pytest-invenio>=1.4.2",
+    "invenio-app>=1.3.1",
     "docker-services-cli>=0.3.0",
 ]
 
 # Should follow inveniosoftware/invenio versions
 invenio_search_version = '>=1.4.0,<2.0.0'
-invenio_db_version = '>=1.0.8,<2.0.0'
+invenio_db_version = '>=1.0.9,<2.0.0'
 
 extras_require = {
     "docs": ["Sphinx>=2.4,<3"],
@@ -60,7 +60,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "invenio-records-resources>=0.17.1,<0.18.0",
+    "invenio-records-resources>=0.17.2,<0.18.0",
 ]
 
 packages = find_packages()
