@@ -267,10 +267,9 @@ class RecordService(RecordServiceBase):
               into records)
             - Create or update associated (published) record with data
         """
-        self.require_permission(identity, "publish")
-
         # Get the draft
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
+        self.require_permission(identity, "publish", record=draft)
 
         # Validate the draft strictly - since a draft can be saved with errors
         # we do a strict validation here to make sure only valid drafts can be
