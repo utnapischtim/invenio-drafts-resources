@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020-2021 CERN.
+# Copyright (C) 2020-2022 CERN.
 # Copyright (C) 2020      Northwestern University.
 # Copyright (C) 2021      TU Wien.
 #
@@ -60,7 +60,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "invenio-records-resources>=0.18.4,<0.19.0",
+    "invenio-records-resources>=0.19.0,<0.20.0",
 ]
 
 packages = find_packages()
