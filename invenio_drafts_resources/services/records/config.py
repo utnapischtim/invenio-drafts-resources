@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2020 CERN.
 # Copyright (C) 2020 Northwestern University.
+# Copyright (C) 2022 Graz University of Technology.
 #
 # Invenio-Drafts-Resources is free software; you can redistribute it and/or
 # modify it under the terms of the MIT License; see LICENSE file for more
@@ -112,6 +113,8 @@ class SearchVersionsOptions(SearchOptions):
         aggs={},
         post_filters={},
     )
+
+    params_interpreters_cls = SearchOptionsBase.params_interpreters_cls
 
 
 class RecordServiceConfig(RecordServiceConfigBase):

@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2021 CERN.
 # Copyright (C) 2021 Northwestern University.
+# Copyright (C) 2022 Graz University of Technology.
 #
 # Invenio-Drafts-Resources is free software; you can redistribute it and/or
 # modify it under the terms of the MIT License; see LICENSE file for more
@@ -31,4 +32,12 @@ def test_search_versions(app, identity_simple, input_data, service):
 
     # test search all versions
     results = service.search(identity_simple, params={"allversions": True})
+    assert set([v1.id, v2.id]) == set([r["id"] for r in results])
+
+
+def test_search_versions_for_record(app, identity_simple, input_data, service):
+    v1, v2 = create_two_versions(service, identity_simple, input_data)
+
+    # test search_versions defaults to all versions
+    results = service.search_versions(identity_simple, v2.id)
     assert set([v1.id, v2.id]) == set([r["id"] for r in results])
