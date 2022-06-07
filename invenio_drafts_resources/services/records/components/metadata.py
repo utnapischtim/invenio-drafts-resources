@@ -10,8 +10,7 @@
 """Records service component base classes."""
 
 from flask_babelex import gettext as _
-from invenio_records_resources.services.records.components import \
-    MetadataComponent
+from invenio_records_resources.services.records.components import MetadataComponent
 
 
 class DraftMetadataComponent(MetadataComponent):
@@ -19,16 +18,16 @@ class DraftMetadataComponent(MetadataComponent):
 
     def update_draft(self, identity, data=None, record=None, **kwargs):
         """Update draft metadata."""
-        record.metadata = data.get('metadata', {})
+        record.metadata = data.get("metadata", {})
 
     def publish(self, identity, draft=None, record=None, **kwargs):
         """Update draft metadata."""
-        record.metadata = draft.get('metadata', {})
+        record.metadata = draft.get("metadata", {})
 
     def edit(self, identity, draft=None, record=None, **kwargs):
         """Update draft metadata."""
-        draft.metadata = record.get('metadata', {})
+        draft.metadata = record.get("metadata", {})
 
     def new_version(self, identity, draft=None, record=None, **kwargs):
         """Update draft metadata."""
-        draft.metadata = record.get('metadata', {})
+        draft.metadata = record.get("metadata", {})

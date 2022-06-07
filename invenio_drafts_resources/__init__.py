@@ -12,4 +12,4 @@
 
 __version__ = "0.16.5"
 
-__all__ = ("__version__", )
+__all__ = ("__version__",)

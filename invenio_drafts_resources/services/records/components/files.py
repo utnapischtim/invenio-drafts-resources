@@ -10,8 +10,7 @@
 """Records service component base classes."""
 
 from flask_babelex import gettext as _
-from invenio_records_resources.services.records.components import \
-    FilesOptionsComponent
+from invenio_records_resources.services.records.components import FilesOptionsComponent
 from marshmallow import ValidationError
 
 from .base import ServiceComponent
@@ -50,12 +49,7 @@ class DraftFilesComponent(ServiceComponent):
         try:
             self.files_component.assign_files_enabled(draft, enabled)
         except ValidationError as e:
-            errors.append(
-                {
-                    "field": "files.enabled",
-                    "messages": e.messages
-                }
-            )
+            errors.append({"field": "files.enabled", "messages": e.messages})
             return  # exit early
 
         if draft.files.enabled and not draft.files.items():
@@ -63,9 +57,11 @@ class DraftFilesComponent(ServiceComponent):
                 {
                     "field": "files.enabled",
                     "messages": [
-                        _("Missing uploaded files. To disable files for "
-                          "this record please mark it as metadata-only.")
-                    ]
+                        _(
+                            "Missing uploaded files. To disable files for "
+                            "this record please mark it as metadata-only."
+                        )
+                    ],
                 }
             )
 
@@ -75,18 +71,13 @@ class DraftFilesComponent(ServiceComponent):
                 default_preview,
             )
         except ValidationError as e:
-            errors.append(
-                {
-                    "field": "files.default_preview",
-                    "messages": e.messages
-                }
-            )
+            errors.append({"field": "files.default_preview", "messages": e.messages})
 
     def edit(self, identity, draft=None, record=None):
         """Edit callback."""
         if draft.bucket is None:
             # Happens, when a soft-deleted draft is un-deleted.
-            draft['files'] = {'enabled': True}
+            draft["files"] = {"enabled": True}
             draft.files.create_bucket()
         draft.files.copy(record.files)
 
@@ -133,9 +124,11 @@ class DraftFilesComponent(ServiceComponent):
         if draft.files.enabled and draft.files.bucket:
             if not draft.files.items():
                 raise ValidationError(
-                    _("Missing uploaded files. To disable files for "
-                      "this record please mark it as metadata-only."),
-                    field_name="files.enabled"
+                    _(
+                        "Missing uploaded files. To disable files for "
+                        "this record please mark it as metadata-only."
+                    ),
+                    field_name="files.enabled",
                 )
 
         if record.bucket_id:
@@ -157,20 +150,17 @@ class DraftFilesComponent(ServiceComponent):
         """Import files handler."""
         if not draft.files.enabled:
             raise ValidationError(
-                _("Files support must be enabled."),
-                field_name="files.enabled"
+                _("Files support must be enabled."), field_name="files.enabled"
             )
 
         if draft.files.items():
             raise ValidationError(
-                _("Please remove all files first."),
-                field_name="files.enabled"
+                _("Please remove all files first."), field_name="files.enabled"
             )
 
         if not record.files.enabled and not record.files.bucket:
             raise ValidationError(
-                _("The record has no files."),
-                field_name="files.enabled"
+                _("The record has no files."), field_name="files.enabled"
             )
 
         # Copy over the files

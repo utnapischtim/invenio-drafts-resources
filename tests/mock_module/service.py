@@ -1,15 +1,14 @@
 """Example service."""
 
 from invenio_records_resources.services import ConditionalLink
-from invenio_records_resources.services import \
-    FileServiceConfig as BaseFileServiceConfig
+from invenio_records_resources.services import (
+    FileServiceConfig as BaseFileServiceConfig,
+)
 from invenio_records_resources.services import RecordLink
 
 from invenio_drafts_resources.services import RecordServiceConfig
-from invenio_drafts_resources.services.records.components import \
-    DraftFilesComponent
-from invenio_drafts_resources.services.records.config import is_draft, \
-    is_record
+from invenio_drafts_resources.services.records.components import DraftFilesComponent
+from invenio_drafts_resources.services.records.config import is_draft, is_record
 
 from .api import Draft, Record
 from .permissions import PermissionPolicy
@@ -25,9 +24,7 @@ class ServiceConfig(RecordServiceConfig):
 
     schema = RecordSchema
 
-    components = RecordServiceConfig.components + [
-        DraftFilesComponent
-    ]
+    components = RecordServiceConfig.components + [DraftFilesComponent]
 
     links_item = {
         "self": ConditionalLink(
@@ -44,10 +41,7 @@ class ServiceConfig(RecordServiceConfig):
         "latest_html": RecordLink("{+ui}/mocks/{id}/latest"),
         "draft": RecordLink("{+api}/mocks/{id}/draft", when=is_record),
         "record": RecordLink("{+api}/mocks/{id}", when=is_draft),
-        "publish": RecordLink(
-            "{+api}/mocks/{id}/draft/actions/publish",
-            when=is_draft
-        ),
+        "publish": RecordLink("{+api}/mocks/{id}/draft/actions/publish", when=is_draft),
         "versions": RecordLink("{+api}/mocks/{id}/versions"),
     }
 

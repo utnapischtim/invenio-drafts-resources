@@ -10,13 +10,23 @@
 """Invenio Drafts Resources module to create REST APIs."""
 
 from flask import g
-from flask_resources import JSONSerializer, ResponseHandler, \
-    resource_requestctx, response_handler, route, with_content_negotiation
-from invenio_records_resources.resources import \
-    RecordResource as RecordResourceBase
-from invenio_records_resources.resources.records.resource import \
-    request_data, request_extra_args, request_headers, request_read_args, \
-    request_search_args, request_view_args
+from flask_resources import (
+    JSONSerializer,
+    ResponseHandler,
+    resource_requestctx,
+    response_handler,
+    route,
+    with_content_negotiation,
+)
+from invenio_records_resources.resources import RecordResource as RecordResourceBase
+from invenio_records_resources.resources.records.resource import (
+    request_data,
+    request_extra_args,
+    request_headers,
+    request_read_args,
+    request_search_args,
+    request_view_args,
+)
 from invenio_records_resources.resources.records.utils import es_preference
 
 from .errors import RedirectException
@@ -64,12 +74,14 @@ class RecordResource(RecordResourceBase):
         ]
 
         if self.service.draft_files:
-            rules.append(route(
-                "POST",
-                p(routes["item-files-import"]),
-                self.import_files,
-                apply_decorators=False
-            ))
+            rules.append(
+                route(
+                    "POST",
+                    p(routes["item-files-import"]),
+                    self.import_files,
+                    apply_decorators=False,
+                )
+            )
 
         return rules
 
@@ -152,10 +164,8 @@ class RecordResource(RecordResourceBase):
 
     @request_view_args
     @with_content_negotiation(
-        response_handlers={
-            'application/json': ResponseHandler(JSONSerializer())
-        },
-        default_accept_mimetype='application/json',
+        response_handlers={"application/json": ResponseHandler(JSONSerializer())},
+        default_accept_mimetype="application/json",
     )
     @response_handler(many=True)
     def import_files(self):

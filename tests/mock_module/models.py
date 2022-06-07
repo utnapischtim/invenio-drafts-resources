@@ -4,27 +4,30 @@ from invenio_db import db
 from invenio_records.models import RecordMetadataBase
 from invenio_records_resources.records import FileRecordModelMixin
 
-from invenio_drafts_resources.records import DraftMetadataBase, \
-    ParentRecordMixin, ParentRecordStateMixin
+from invenio_drafts_resources.records import (
+    DraftMetadataBase,
+    ParentRecordMixin,
+    ParentRecordStateMixin,
+)
 
 
 class ParentRecordMetadata(db.Model, RecordMetadataBase):
     """Model for mock module metadata."""
 
-    __tablename__ = 'parent_mock_metadata'
+    __tablename__ = "parent_mock_metadata"
 
 
 class DraftMetadata(db.Model, DraftMetadataBase, ParentRecordMixin):
     """Model for mock module metadata."""
 
-    __tablename__ = 'draft_mock_metadata'
+    __tablename__ = "draft_mock_metadata"
     __parent_record_model__ = ParentRecordMetadata
 
 
 class RecordMetadata(db.Model, RecordMetadataBase, ParentRecordMixin):
     """Model for mock module metadata."""
 
-    __tablename__ = 'record_mock_metadata'
+    __tablename__ = "record_mock_metadata"
     __parent_record_model__ = ParentRecordMetadata
 
 
@@ -41,7 +44,7 @@ class FileRecordMetadata(db.Model, RecordMetadataBase, FileRecordModelMixin):
 
     __record_model_cls__ = RecordMetadata
 
-    __tablename__ = 'mock_record_files'
+    __tablename__ = "mock_record_files"
 
 
 class FileDraftMetadata(db.Model, RecordMetadataBase, FileRecordModelMixin):
@@ -49,4 +52,4 @@ class FileDraftMetadata(db.Model, RecordMetadataBase, FileRecordModelMixin):
 
     __record_model_cls__ = DraftMetadata
 
-    __tablename__ = 'mock_draft_files'
+    __tablename__ = "mock_draft_files"

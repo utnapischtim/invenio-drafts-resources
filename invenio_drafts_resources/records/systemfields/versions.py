@@ -107,7 +107,8 @@ class VersionsManager:
         if self._state is None or refresh:
             # Get object if it exists
             self._state = self.model_cls.query.filter_by(
-                parent_id=self.parent_id).one_or_none()
+                parent_id=self.parent_id
+            ).one_or_none()
             if self._state is None:
                 # Object doesn't exists, so create it.
                 self._state = self.model_cls(parent_id=self.parent_id)
@@ -148,12 +149,12 @@ class VersionsManager:
         """Load the state."""
         self._state = self.model_cls(
             parent_id=self.parent_id,
-            latest_id=uuid_or_none(dump['latest_id']),
-            latest_index=dump['latest_index'],
-            next_draft_id=uuid_or_none(dump['next_draft_id']),
+            latest_id=uuid_or_none(dump["latest_id"]),
+            latest_index=dump["latest_index"],
+            next_draft_id=uuid_or_none(dump["next_draft_id"]),
         )
-        if self.index != dump['index']:
-            self._record.model.index = dump['index']
+        if self.index != dump["index"]:
+            self._record.model.index = dump["index"]
 
     def __repr__(self):
         """Return repr(self)."""

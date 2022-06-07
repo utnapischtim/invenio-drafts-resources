@@ -14,8 +14,11 @@ fixtures are available.
 
 import pytest
 from invenio_records_resources.resources import FileResource
-from mock_module.resource import DraftFileResourceConfig, FileResourceConfig, \
-    RecordResourceConfig
+from mock_module.resource import (
+    DraftFileResourceConfig,
+    FileResourceConfig,
+    RecordResourceConfig,
+)
 from mock_module.service import ServiceConfig
 
 from invenio_drafts_resources.resources import RecordResource
@@ -28,7 +31,7 @@ def service(file_service, draft_file_service):
     return RecordService(
         ServiceConfig,
         files_service=file_service,
-        draft_files_service=draft_file_service
+        draft_files_service=draft_file_service,
     )
 
 
@@ -47,23 +50,28 @@ def file_resource(file_service):
 @pytest.fixture(scope="module")
 def draft_file_resource(draft_file_service):
     """Draft file resource."""
-    return FileResource(
-        config=DraftFileResourceConfig, service=draft_file_service)
+    return FileResource(config=DraftFileResourceConfig, service=draft_file_service)
 
 
 @pytest.fixture(scope="module")
 def base_app(
-        base_app, record_resource, file_resource, draft_file_resource,
-        service, file_service, draft_file_service):
+    base_app,
+    record_resource,
+    file_resource,
+    draft_file_resource,
+    service,
+    file_service,
+    draft_file_service,
+):
     """Application factory fixture."""
     base_app.register_blueprint(record_resource.as_blueprint())
     base_app.register_blueprint(file_resource.as_blueprint())
     base_app.register_blueprint(draft_file_resource.as_blueprint())
 
-    registry = base_app.extensions['invenio-records-resources'].registry
-    registry.register(service, service_id='mock-records-service')
-    registry.register(file_service, service_id='mock-files-service')
-    registry.register(draft_file_service, service_id='mock-draftfiles-service')
+    registry = base_app.extensions["invenio-records-resources"].registry
+    registry.register(service, service_id="mock-records-service")
+    registry.register(file_service, service_id="mock-files-service")
+    registry.register(draft_file_service, service_id="mock-draftfiles-service")
     yield base_app
 
 
@@ -71,6 +79,6 @@ def base_app(
 def headers():
     """Default headers for making requests."""
     return {
-        'content-type': 'application/json',
-        'accept': 'application/json',
+        "content-type": "application/json",
+        "accept": "application/json",
     }

@@ -9,8 +9,9 @@
 
 """Base class for service components."""
 
-from invenio_records_resources.services.records.components import \
-    ServiceComponent as BaseServiceComponent
+from invenio_records_resources.services.records.components import (
+    ServiceComponent as BaseServiceComponent,
+)
 
 
 class ServiceComponent(BaseServiceComponent):

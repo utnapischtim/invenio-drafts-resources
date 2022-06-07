@@ -2,15 +2,20 @@
 
 from invenio_records.systemfields import ConstantField, ModelField
 from invenio_records_resources.records import FileRecord as FileRecordBase
-from invenio_records_resources.records.systemfields import FilesField, \
-    IndexField
+from invenio_records_resources.records.systemfields import FilesField, IndexField
 
 from invenio_drafts_resources.records import Draft as DraftBase
 from invenio_drafts_resources.records import ParentRecord as ParentRecordBase
 from invenio_drafts_resources.records import Record as RecordBase
 
-from .models import DraftMetadata, FileDraftMetadata, FileRecordMetadata, \
-    ParentRecordMetadata, ParentState, RecordMetadata
+from .models import (
+    DraftMetadata,
+    FileDraftMetadata,
+    FileRecordMetadata,
+    ParentRecordMetadata,
+    ParentState,
+    RecordMetadata,
+)
 
 
 class ParentRecord(ParentRecordBase):
@@ -21,7 +26,8 @@ class ParentRecord(ParentRecordBase):
 
     # System fields
     schema = ConstantField(
-        '$schema', 'http://localhost/schemas/records/parent-v1.0.0.json')
+        "$schema", "http://localhost/schemas/records/parent-v1.0.0.json"
+    )
 
 
 class FileRecord(FileRecordBase):
@@ -41,11 +47,11 @@ class Record(RecordBase):
 
     # System fields
     schema = ConstantField(
-        '$schema', 'http://localhost/schemas/records/record-v1.0.0.json')
+        "$schema", "http://localhost/schemas/records/record-v1.0.0.json"
+    )
 
     index = IndexField(
-        'draftsresources-records-record-v1.0.0',
-        search_alias='draftsresources-records'
+        "draftsresources-records-record-v1.0.0", search_alias="draftsresources-records"
     )
 
     files = FilesField(
@@ -79,11 +85,11 @@ class Draft(DraftBase):
 
     # System fields
     schema = ConstantField(
-        '$schema', 'http://localhost/schemas/records/record-v1.0.0.json')
+        "$schema", "http://localhost/schemas/records/record-v1.0.0.json"
+    )
 
     index = IndexField(
-        'draftsresources-drafts-draft-v1.0.0',
-        search_alias='draftsresources-drafts'
+        "draftsresources-drafts-draft-v1.0.0", search_alias="draftsresources-drafts"
     )
 
     files = FilesField(

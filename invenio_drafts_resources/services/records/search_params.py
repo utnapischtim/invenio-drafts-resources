@@ -11,8 +11,7 @@
 
 from functools import partial
 
-from invenio_records_resources.services.records.params.base import \
-    ParamInterpreter
+from invenio_records_resources.services.records.params.base import ParamInterpreter
 
 
 class AllVersionsParam(ParamInterpreter):
@@ -31,5 +30,5 @@ class AllVersionsParam(ParamInterpreter):
     def apply(self, identity, search, params):
         """Evaluate the allversions parameter on the search."""
         if not params.get("allversions"):
-            search = search.filter('term', **{self.field_name: True})
+            search = search.filter("term", **{self.field_name: True})
         return search

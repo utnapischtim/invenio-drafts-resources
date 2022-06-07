@@ -43,12 +43,12 @@ def test_create_draft(app, service, identity_simple, input_data):
         assert draft[key] == value
 
     # Check for pid and parent pid
-    assert draft['id']
-    assert draft['parent']['id']
-    assert draft['is_published'] is False
-    assert draft['versions']['is_latest_draft'] is True
-    assert draft['versions']['is_latest'] is False
-    assert 'errors' not in draft_dict
+    assert draft["id"]
+    assert draft["parent"]["id"]
+    assert draft["is_published"] is False
+    assert draft["versions"]["is_latest_draft"] is True
+    assert draft["versions"]["is_latest"] is False
+    assert "errors" not in draft_dict
 
 
 def test_create_empty_draft(app, service, identity_simple):
@@ -56,16 +56,14 @@ def test_create_empty_draft(app, service, identity_simple):
 
     Errors (missing required fields) are reported, but don't prevent creation.
     """
-    input_data = {
-        "metadata": {}
-    }
+    input_data = {"metadata": {}}
 
     draft = service.create(identity_simple, input_data)
     draft_dict = draft.to_dict()
 
-    assert draft['id']
-    assert draft['is_published'] is False
-    assert draft_dict['errors'][0]['field'] == 'metadata.title'
+    assert draft["id"]
+    assert draft["is_published"] is False
+    assert draft_dict["errors"][0]["field"] == "metadata.title"
 
 
 def test_read_draft(app, service, identity_simple, input_data):
@@ -80,34 +78,34 @@ def test_update_draft(app, service, identity_simple, input_data):
     draft = service.create(identity_simple, input_data)
     assert draft.id
 
-    orig_title = input_data['metadata']['title']
+    orig_title = input_data["metadata"]["title"]
     edited_title = "Edited title"
-    input_data['metadata']['title'] = edited_title
+    input_data["metadata"]["title"] = edited_title
 
     # Update draft content
     update_draft = service.update_draft(identity_simple, draft.id, input_data)
-    assert update_draft["metadata"]['title'] == edited_title
+    assert update_draft["metadata"]["title"] == edited_title
     assert draft.id == update_draft.id
 
     # Check the updates where saved
     update_draft = service.read_draft(identity_simple, draft.id)
     assert draft.id == update_draft.id
-    assert update_draft["metadata"]['title'] == edited_title
+    assert update_draft["metadata"]["title"] == edited_title
 
 
 def test_update_draft_invalid_field(app, service, identity_simple, input_data):
     """Update with invalid field reports rather than raises errors."""
     draft = service.create(identity_simple, input_data)
-    orig_title = input_data['metadata']['title']
+    orig_title = input_data["metadata"]["title"]
     edited_title = 100
-    input_data['metadata']['title'] = edited_title
+    input_data["metadata"]["title"] = edited_title
 
     updated_draft = service.update_draft(identity_simple, draft.id, input_data)
     updated_draft_dict = updated_draft.to_dict()
 
     assert draft.id == updated_draft.id
-    assert 'title' not in updated_draft["metadata"]
-    assert updated_draft_dict['errors'][0]['field'] == 'metadata.title'
+    assert "title" not in updated_draft["metadata"]
+    assert updated_draft_dict["errors"][0]["field"] == "metadata.title"
 
 
 def test_delete_draft(app, service, identity_simple, input_data):
@@ -157,9 +155,7 @@ def test_fail_to_publish_invalid_draft(app, service, identity_simple):
     Note that the publish action requires a draft to be created first.
     """
     # Needs `app` context because of invenio_access/permissions.py#166
-    input_data = {
-        "metadata": {}
-    }
+    input_data = {"metadata": {}}
     draft = service.create(identity_simple, input_data)
 
     with pytest.raises(ValidationError) as e:
@@ -184,8 +180,8 @@ def test_fail_to_publish_invalid_draft(app, service, identity_simple):
 # therefore these tests do not assert their output)
 #
 
-def test_create_publish_new_revision(app, service, identity_simple,
-                                     input_data):
+
+def test_create_publish_new_revision(app, service, identity_simple, input_data):
     """Test creating a new revision of a record.
 
     This tests the `edit` service method.
@@ -202,26 +198,26 @@ def test_create_publish_new_revision(app, service, identity_simple,
     assert draft._record.revision_id == 5
 
     # Update the content
-    orig_title = input_data['metadata']['title']
+    orig_title = input_data["metadata"]["title"]
     edited_title = "Edited title"
-    input_data['metadata']['title'] = edited_title
+    input_data["metadata"]["title"] = edited_title
 
     update_draft = service.update_draft(identity_simple, draft.id, input_data)
 
     # Check the actual record was not modified
     record = service.read(identity_simple, recid)
-    assert record["metadata"]['title'] == orig_title
+    assert record["metadata"]["title"] == orig_title
 
     # Publish it to check the increment in version_id
     record = service.publish(identity_simple, recid)
 
     assert record.id == recid
     assert record._record.revision_id == 2
-    assert record["metadata"]['title'] == edited_title
+    assert record["metadata"]["title"] == edited_title
 
     # Check it was actually edited
     record = service.read(identity_simple, recid)
-    assert record["metadata"]['title'] == edited_title
+    assert record["metadata"]["title"] == edited_title
 
 
 def test_mutiple_edit(app, service, identity_simple, input_data):
@@ -253,8 +249,7 @@ def test_mutiple_edit(app, service, identity_simple, input_data):
     assert draft._record.revision_id == 8  # soft-delete, undelete, update
 
 
-def test_create_publish_new_version(app, service, identity_simple,
-                                    input_data):
+def test_create_publish_new_version(app, service, identity_simple, input_data):
     """Test creating a new version of a record.
 
     This tests the `new_version` service method.
@@ -266,7 +261,7 @@ def test_create_publish_new_version(app, service, identity_simple,
     draft = service.new_version(identity_simple, recid)
 
     assert draft._record.revision_id == 2
-    assert draft['id'] != record['id']
+    assert draft["id"] != record["id"]
     assert draft._record.pid.status == PIDStatus.NEW
     assert draft._record.parent.pid.status == PIDStatus.REGISTERED
 
@@ -281,7 +276,7 @@ def test_create_publish_new_version(app, service, identity_simple,
     assert record_2._record.pid.status == PIDStatus.REGISTERED
     assert record_2._record.parent.pid.status == PIDStatus.REGISTERED
     assert record_2._record.revision_id == 1
-    assert record_2['id'] != record['id']
+    assert record_2["id"] != record["id"]
 
 
 def test_read_latest_version(app, service, identity_simple, input_data):
@@ -304,9 +299,9 @@ def test_read_latest_version(app, service, identity_simple, input_data):
     recid_2 = record_2.id
 
     latest = service.read_latest(identity_simple, recid)
-    assert latest['id'] == recid_2
+    assert latest["id"] == recid_2
     latest = service.read_latest(identity_simple, recid_2)
-    assert latest['id'] == recid_2
+    assert latest["id"] == recid_2
 
 
 def test_reindexing_all_siblings(app, service, identity_simple, input_data):
@@ -325,9 +320,7 @@ def test_reindexing_all_siblings(app, service, identity_simple, input_data):
     # (note: service.search_draft(...) would always give me 0 results here)
     metadata = service.read_draft(identity_simple, recid).data["metadata"]
     assert metadata["title"] == "Test (draft)"
-    hits = [
-        hit for hit in service.draft_cls.index.search() if hit["id"] == recid
-    ]
+    hits = [hit for hit in service.draft_cls.index.search() if hit["id"] == recid]
     assert hits
     assert hits[0]["metadata"]["title"] == record.metadata["title"]
 
@@ -335,8 +328,6 @@ def test_reindexing_all_siblings(app, service, identity_simple, input_data):
     # and make sure that the draft is updated now
     service._index_related_records(record, parent=record.parent)
     draft.index.refresh()
-    hits = [
-        hit for hit in service.draft_cls.index.search() if hit["id"] == recid
-    ]
+    hits = [hit for hit in service.draft_cls.index.search() if hit["id"] == recid]
     assert hits
     assert hits[0]["metadata"]["title"] == draft.metadata["title"]

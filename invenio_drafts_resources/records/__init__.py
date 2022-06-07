@@ -14,8 +14,7 @@ It applies to both api.py's Draft and Record.
 """
 
 from .api import Draft, ParentRecord, Record
-from .models import DraftMetadataBase, ParentRecordMixin, \
-    ParentRecordStateMixin
+from .models import DraftMetadataBase, ParentRecordMixin, ParentRecordStateMixin
 
 __all__ = (
     "Draft",

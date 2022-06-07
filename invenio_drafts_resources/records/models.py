@@ -35,8 +35,9 @@ class ParentRecordMixin:
         """Parent identifier."""
         # We restrict deletion of the parent record in case a record or draft
         # exists via database-level trigger.
-        return db.Column(UUIDType, db.ForeignKey(
-            cls.__parent_record_model__.id, ondelete="RESTRICT"))
+        return db.Column(
+            UUIDType, db.ForeignKey(cls.__parent_record_model__.id, ondelete="RESTRICT")
+        )
 
     @declared_attr
     def parent(cls):
@@ -131,6 +132,6 @@ class DraftMetadataBase(RecordMetadataBase):
     expires_at = db.Column(
         db.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"),
         default=datetime.utcnow,
-        nullable=True
+        nullable=True,
     )
     """Specifies when the draft expires. If `NULL` the draft doesn't expire."""

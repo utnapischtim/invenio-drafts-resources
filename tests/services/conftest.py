@@ -36,7 +36,7 @@ def file_service():
 @pytest.fixture()
 def example_record(app, db):
     """Example record."""
-    record = Draft.create({}, metadata={'title': 'Test'})
+    record = Draft.create({}, metadata={"title": "Test"})
     db.session.commit()
     return record
 

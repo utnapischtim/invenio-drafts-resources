@@ -2,8 +2,7 @@
 
 from invenio_records_permissions.generators import AnyUser
 
-from invenio_drafts_resources.services.records.permissions import \
-    RecordPermissionPolicy
+from invenio_drafts_resources.services.records.permissions import RecordPermissionPolicy
 
 
 class PermissionPolicy(RecordPermissionPolicy):
