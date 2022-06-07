@@ -9,6 +9,7 @@
 
 """Invenio Drafts Resources module to create REST APIs."""
 
-from .version import __version__
+
+__version__ = "0.16.5"
 
 __all__ = ("__version__", )
