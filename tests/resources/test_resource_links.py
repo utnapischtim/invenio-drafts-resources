@@ -32,7 +32,7 @@ def test_create_draft(client, headers, input_data, location):
 
 def test_read_draft(client, headers, input_data, location):
     response = client.post("/mocks", json=input_data, headers=headers)
-    pid_value = response.json['id']
+    pid_value = response.json["id"]
     response = client.get(f"/mocks/{pid_value}/draft", headers=headers)
 
     assert response.status_code == 200
@@ -43,11 +43,9 @@ def test_update_draft(client, headers, input_data, location):
     response = client.post("/mocks", json=input_data, headers=headers)
     pid_value = response.json["id"]
     input_data = deepcopy(input_data)
-    input_data['metadata']['title'] = "Updated title"  # Shouldn't matter
+    input_data["metadata"]["title"] = "Updated title"  # Shouldn't matter
 
-    response = client.put(
-        f"/mocks/{pid_value}/draft", json=input_data, headers=headers
-    )
+    response = client.put(f"/mocks/{pid_value}/draft", json=input_data, headers=headers)
 
     assert response.status_code == 200
     assert_expected_links(pid_value, response.json["links"])
@@ -55,12 +53,10 @@ def test_update_draft(client, headers, input_data, location):
 
 def test_publish_draft(client, headers, input_data, location):
     response = client.post("/mocks", json=input_data, headers=headers)
-    pid_value = response.json['id']
+    pid_value = response.json["id"]
 
     # NOTE: This returns a record
-    response = client.post(
-        f"/mocks/{pid_value}/draft/actions/publish", headers=headers
-    )
+    response = client.post(f"/mocks/{pid_value}/draft/actions/publish", headers=headers)
 
     assert response.status_code == 202
     links = response.json["links"]

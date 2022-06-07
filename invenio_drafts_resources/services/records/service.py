@@ -11,11 +11,14 @@
 
 from elasticsearch_dsl.query import Q
 from invenio_records_resources.services import LinksTemplate
-from invenio_records_resources.services import \
-    RecordService as RecordServiceBase
+from invenio_records_resources.services import RecordService as RecordServiceBase
 from invenio_records_resources.services import ServiceSchemaWrapper
-from invenio_records_resources.services.uow import RecordCommitOp, \
-    RecordDeleteOp, RecordIndexOp, unit_of_work
+from invenio_records_resources.services.uow import (
+    RecordCommitOp,
+    RecordDeleteOp,
+    RecordIndexOp,
+    unit_of_work,
+)
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -65,16 +68,17 @@ class RecordService(RecordServiceBase):
         """Do not use."""
         raise NotImplementedError("Records should be updated via their draft.")
 
-    def search_drafts(self, identity, params=None, es_preference=None,
-                      expand=False, **kwargs):
+    def search_drafts(
+        self, identity, params=None, es_preference=None, expand=False, **kwargs
+    ):
         """Search for drafts records matching the querystring."""
-        self.require_permission(identity, 'search_drafts')
+        self.require_permission(identity, "search_drafts")
 
         # Prepare and execute the search
         params = params or {}
 
         search_result = self._search(
-            'search_drafts',
+            "search_drafts",
             identity,
             params,
             es_preference,
@@ -83,8 +87,8 @@ class RecordService(RecordServiceBase):
             # `has_draft` systemfield is not defined here. This is not ideal
             # but it helps avoid overriding the method. See how is used in
             # https://github.com/inveniosoftware/invenio-rdm-records
-            extra_filter=Q('term', has_draft=False),
-            permission_action='read_draft',
+            extra_filter=Q("term", has_draft=False),
+            permission_action="read_draft",
             **kwargs
         ).execute()
 
@@ -93,16 +97,17 @@ class RecordService(RecordServiceBase):
             identity,
             search_result,
             params,
-            links_tpl=LinksTemplate(self.config.links_search_drafts, context={
-                "args": params
-            }),
+            links_tpl=LinksTemplate(
+                self.config.links_search_drafts, context={"args": params}
+            ),
             links_item_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
         )
 
-    def search_versions(self, identity, id_, params=None, es_preference=None,
-                        expand=False, **kwargs):
+    def search_versions(
+        self, identity, id_, params=None, es_preference=None, expand=False, **kwargs
+    ):
         """Search for record's versions."""
         try:
             record = self.record_cls.pid.resolve(id_, registered_only=False)
@@ -115,15 +120,14 @@ class RecordService(RecordServiceBase):
         params = params or {}
 
         search_result = self._search(
-            'search_versions',
+            "search_versions",
             identity,
             params,
             es_preference,
             record_cls=self.record_cls,
             search_opts=self.config.search_versions,
-            extra_filter=Q(
-                'term', **{'parent.id': str(record.parent.pid.pid_value)}),
-            permission_action='read',
+            extra_filter=Q("term", **{"parent.id": str(record.parent.pid.pid_value)}),
+            permission_action="read",
             **kwargs
         ).execute()
 
@@ -133,8 +137,7 @@ class RecordService(RecordServiceBase):
             search_result,
             params,
             links_tpl=LinksTemplate(
-                self.config.links_search_versions,
-                context={"id": id_, "args": params}
+                self.config.links_search_versions, context={"id": id_, "args": params}
             ),
             links_item_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
@@ -149,11 +152,13 @@ class RecordService(RecordServiceBase):
 
         # Run components
         for component in self.components:
-            if hasattr(component, 'read_draft'):
+            if hasattr(component, "read_draft"):
                 component.read_draft(identity, draft=draft)
 
         return self.result_item(
-            self, identity, draft,
+            self,
+            identity,
+            draft,
             links_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
@@ -171,15 +176,18 @@ class RecordService(RecordServiceBase):
         self.require_permission(identity, "read", record=record)
 
         return self.result_item(
-            self, identity, record,
+            self,
+            identity,
+            record,
             links_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
         )
 
     @unit_of_work()
-    def update_draft(self, identity, id_, data, revision_id=None, uow=None,
-                     expand=False):
+    def update_draft(
+        self, identity, id_, data, revision_id=None, uow=None, expand=False
+    ):
         """Replace a draft."""
         draft = self.draft_cls.pid.resolve(id_, registered_only=False)
 
@@ -198,13 +206,12 @@ class RecordService(RecordServiceBase):
             ),
             # Saving a draft only saves valid metadata and reports
             # (doesn't raise) errors
-            raise_errors=False
+            raise_errors=False,
         )
 
         # Run components
         self.run_components(
-            'update_draft', identity, record=draft, data=data,
-            errors=errors, uow=uow
+            "update_draft", identity, record=draft, data=data, errors=errors, uow=uow
         )
 
         # Commit and index
@@ -227,12 +234,12 @@ class RecordService(RecordServiceBase):
         It does NOT eagerly create the associated record.
         """
         res = self._create(
-           self.draft_cls,
-           identity,
-           data,
-           raise_errors=False,
-           uow=uow,
-           expand=expand,
+            self.draft_cls,
+            identity,
+            data,
+            raise_errors=False,
+            uow=uow,
+            expand=expand,
         )
         uow.register(RecordCommitOp(res._record.parent))
         return res
@@ -248,7 +255,8 @@ class RecordService(RecordServiceBase):
             draft = self.draft_cls.pid.resolve(id_, registered_only=False)
             self.require_permission(identity, "edit", record=draft)
             return self.result_item(
-                self, identity, draft, links_tpl=self.links_item_tpl)
+                self, identity, draft, links_tpl=self.links_item_tpl
+            )
         except NoResultFound:
             pass
 
@@ -259,8 +267,7 @@ class RecordService(RecordServiceBase):
         draft = self.draft_cls.edit(record)
 
         # Run components
-        self.run_components(
-            "edit", identity, draft=draft, record=record, uow=uow)
+        self.run_components("edit", identity, draft=draft, record=record, uow=uow)
 
         uow.register(RecordCommitOp(draft, indexer=self.indexer))
 
@@ -269,7 +276,9 @@ class RecordService(RecordServiceBase):
         uow.register(RecordIndexOp(record, indexer=self.indexer))
 
         return self.result_item(
-            self, identity, draft,
+            self,
+            identity,
+            draft,
             links_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
@@ -300,8 +309,7 @@ class RecordService(RecordServiceBase):
         record = self.record_cls.publish(draft)
 
         # Run components
-        self.run_components(
-            'publish', identity, draft=draft, record=record, uow=uow)
+        self.run_components("publish", identity, draft=draft, record=record, uow=uow)
 
         # Commit and index
         uow.register(RecordCommitOp(record, indexer=self.indexer))
@@ -311,7 +319,9 @@ class RecordService(RecordServiceBase):
             self._reindex_latest(latest_id, uow=uow)
 
         return self.result_item(
-            self, identity, record,
+            self,
+            identity,
+            record,
             links_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
@@ -329,10 +339,10 @@ class RecordService(RecordServiceBase):
 
         # Draft for new version already exists? if so return it
         if record.versions.next_draft_id:
-            next_draft = self.draft_cls.get_record(
-                record.versions.next_draft_id)
+            next_draft = self.draft_cls.get_record(record.versions.next_draft_id)
             return self.result_item(
-                self, identity, next_draft, links_tpl=self.links_item_tpl)
+                self, identity, next_draft, links_tpl=self.links_item_tpl
+            )
 
         # Draft for new version does not exists, so create it
         next_draft = self.draft_cls.new_version(record)
@@ -343,16 +353,18 @@ class RecordService(RecordServiceBase):
 
         # Run components
         self.run_components(
-            'new_version', identity, draft=next_draft, record=record, uow=uow)
+            "new_version", identity, draft=next_draft, record=record, uow=uow
+        )
 
         # Commit and index
         uow.register(RecordCommitOp(next_draft, indexer=self.indexer))
 
-        self._reindex_latest(
-            next_draft.versions.latest_id, record=record, uow=uow)
+        self._reindex_latest(next_draft.versions.latest_id, record=record, uow=uow)
 
         return self.result_item(
-            self, identity, next_draft,
+            self,
+            identity,
+            next_draft,
             links_tpl=self.links_item_tpl,
             expandable_fields=self.expandable_fields,
             expand=expand,
@@ -382,8 +394,7 @@ class RecordService(RecordServiceBase):
 
         # Run components
         self.run_components(
-            'delete_draft', identity, draft=draft, record=record,
-            force=force, uow=uow
+            "delete_draft", identity, draft=draft, record=record, force=force, uow=uow
         )
 
         # Note, the parent record deletion logic is implemented in the
@@ -392,8 +403,9 @@ class RecordService(RecordServiceBase):
         # We refresh the index because users are usually redirected to a
         # search result immediately after, and we don't want the users to see
         # their just deleted draft.
-        uow.register(RecordDeleteOp(
-            draft, indexer=self.indexer, force=force, index_refresh=True))
+        uow.register(
+            RecordDeleteOp(draft, indexer=self.indexer, force=force, index_refresh=True)
+        )
 
         if force:
             # Case 1: We deleted a new draft (without a published record) or a
@@ -404,8 +416,9 @@ class RecordService(RecordServiceBase):
             # Case 2: We deleted a draft for a published record.
             # In this case we reindex just the published record to trigger and
             # update of computed values.
-            uow.register(RecordIndexOp(
-                record, indexer=self.indexer, index_refresh=True))
+            uow.register(
+                RecordIndexOp(record, indexer=self.indexer, index_refresh=True)
+            )
 
         return True
 
@@ -425,7 +438,8 @@ class RecordService(RecordServiceBase):
 
         # Run components
         self.run_components(
-            'import_files', identity, draft=draft, record=record, uow=uow)
+            "import_files", identity, draft=draft, record=record, uow=uow
+        )
 
         # Commit and index
         uow.register(RecordCommitOp(draft, indexer=self.indexer))
@@ -477,12 +491,13 @@ class RecordService(RecordServiceBase):
                 record=draft,
             ),
             raise_errors=True  # this is the default, but might as well be
-                               # explicit
+            # explicit
         )
 
     @unit_of_work()
-    def _reindex_latest(self, latest_id, record=None, draft=None,
-                        refresh=False, uow=None):
+    def _reindex_latest(
+        self, latest_id, record=None, draft=None, refresh=False, uow=None
+    ):
         """Reindex the latest published record and draft.
 
         This triggers and update of computed values in the index, such as
@@ -499,15 +514,15 @@ class RecordService(RecordServiceBase):
         # want to index the latest published.
         if record is None or latest_id != record.id:
             record = self.record_cls.get_record(latest_id)
-        uow.register(
-            RecordIndexOp(record, indexer=self.indexer, index_refresh=refresh))
+        uow.register(RecordIndexOp(record, indexer=self.indexer, index_refresh=refresh))
 
         # Note, a draft may or may not exists for a published record (depending
         # on if it's being edited).
         try:
             draft = self.draft_cls.get_record(latest_id)
-            uow.register(RecordIndexOp(
-                draft, indexer=self.indexer, index_refresh=refresh))
+            uow.register(
+                RecordIndexOp(draft, indexer=self.indexer, index_refresh=refresh)
+            )
         except NoResultFound:
             pass
 
@@ -537,9 +552,7 @@ class RecordService(RecordServiceBase):
         because the JSON payload is empty.
         """
         _parent = parent or record.parent
-        siblings = self.record_cls.get_records_by_parent(
-            _parent, include_deleted=False
-        )
+        siblings = self.record_cls.get_records_by_parent(_parent, include_deleted=False)
 
         if self.draft_cls is not None:
             # if drafts are available, reindex them as well

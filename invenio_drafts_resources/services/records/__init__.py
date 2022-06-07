@@ -13,6 +13,6 @@ from .config import RecordServiceConfig
 from .service import RecordService
 
 __all__ = (
-    'RecordService',
-    'RecordServiceConfig',
+    "RecordService",
+    "RecordServiceConfig",
 )

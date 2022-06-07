@@ -16,8 +16,9 @@ from sqlalchemy.exc import IntegrityError
 class ParentField(RelatedModelField):
     """Parent record field."""
 
-    def __init__(self, model, key=None, create=False,
-                 soft_delete=True, hard_delete=True):
+    def __init__(
+        self, model, key=None, create=False, soft_delete=True, hard_delete=True
+    ):
         """Initialize the parent field."""
         self._soft_delete = soft_delete
         self._hard_delete = hard_delete

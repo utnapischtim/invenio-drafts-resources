@@ -32,14 +32,13 @@ class RedirectException(HTTPJSONException):
 
     def get_headers(self, environ=None, scope=None):
         """Get response headers."""
-        return [
-            ("Content-Type", "application/json"), ("Location", self.location)]
+        return [("Content-Type", "application/json"), ("Location", self.location)]
 
     def get_body(self, environ=None, scope=None):
         """Get the request body."""
         body = {
             "status": self.code,
             "message": self.get_description(environ),
-            "location": self.location
+            "location": self.location,
         }
         return json.dumps(body)

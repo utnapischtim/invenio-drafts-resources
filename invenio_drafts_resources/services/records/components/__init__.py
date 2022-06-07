@@ -16,9 +16,9 @@ from .pid import PIDComponent
 from .relations import RelationsComponent
 
 __all__ = (
-    'ServiceComponent',
-    'DraftFilesComponent',
-    'DraftMetadataComponent',
-    'PIDComponent',
-    'RelationsComponent',
+    "ServiceComponent",
+    "DraftFilesComponent",
+    "DraftMetadataComponent",
+    "PIDComponent",
+    "RelationsComponent",
 )

@@ -19,30 +19,28 @@ from invenio_drafts_resources.services.records.tasks import cleanup_drafts
 @pytest.fixture()
 def input_data(input_data):
     """Enable files."""
-    input_data['files']['enabled'] = False
+    input_data["files"]["enabled"] = False
     return input_data
 
 
 @pytest.fixture(scope="module")
 def base_app(base_app, service):
     """Application factory fixture."""
-    registry = base_app.extensions['invenio-records-resources'].registry
-    registry.register(service, service_id='records')
+    registry = base_app.extensions["invenio-records-resources"].registry
+    registry.register(service, service_id="records")
     yield base_app
 
 
-def test_hard_delete_soft_deleted_task(
-    app, service, identity_simple, input_data
-):
+def test_hard_delete_soft_deleted_task(app, service, identity_simple, input_data):
     draft = service.create(identity_simple, input_data)
     service.publish(identity_simple, draft.id)
     draft_model = service.draft_cls.model_cls
 
-    assert len(draft_model.query.filter(
-        draft_model.is_deleted == True  # noqa
-    ).all()) == 1
+    assert (
+        len(draft_model.query.filter(draft_model.is_deleted == True).all()) == 1  # noqa
+    )
     cleanup_drafts(seconds=0)
 
-    assert len(draft_model.query.filter(
-        draft_model.is_deleted == True  # noqa
-    ).all()) == 0
+    assert (
+        len(draft_model.query.filter(draft_model.is_deleted == True).all()) == 0  # noqa
+    )

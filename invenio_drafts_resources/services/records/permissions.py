@@ -10,8 +10,9 @@
 """Drafts permissions."""
 
 from invenio_records_permissions.generators import AnyUser
-from invenio_records_permissions.policies.records import \
-    RecordPermissionPolicy as RecordPermissionPolicyBase
+from invenio_records_permissions.policies.records import (
+    RecordPermissionPolicy as RecordPermissionPolicyBase,
+)
 
 
 class RecordPermissionPolicy(RecordPermissionPolicyBase):

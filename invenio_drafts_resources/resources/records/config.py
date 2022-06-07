@@ -9,8 +9,9 @@
 
 """Draft aware Record Resource Config override."""
 
-from invenio_records_resources.resources import \
-    RecordResourceConfig as RecordResourceConfigBase
+from invenio_records_resources.resources import (
+    RecordResourceConfig as RecordResourceConfigBase,
+)
 
 from .args import SearchRequestArgsSchema
 

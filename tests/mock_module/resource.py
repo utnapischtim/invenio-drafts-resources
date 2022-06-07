@@ -11,8 +11,9 @@
 
 """Example resource."""
 
-from invenio_records_resources.resources import \
-    FileResourceConfig as FileResourceConfigBase
+from invenio_records_resources.resources import (
+    FileResourceConfig as FileResourceConfigBase,
+)
 from marshmallow import Schema
 
 from invenio_drafts_resources.resources import RecordResourceConfig

@@ -28,8 +28,7 @@ from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
 from invenio_records.systemfields import ModelField
 from invenio_records_resources.records import Record as RecordBase
-from invenio_records_resources.records.systemfields import PIDField, \
-    PIDStatusCheckField
+from invenio_records_resources.records.systemfields import PIDField, PIDStatusCheckField
 from sqlalchemy.orm.exc import NoResultFound
 
 from .systemfields import ParentField, VersionsField
@@ -53,7 +52,7 @@ class ParentRecord(RecordBase):
     # Configuration
     model_cls = None
 
-    pid = PIDField('id', provider=DraftRecordIdProviderV2, delete=True)
+    pid = PIDField("id", provider=DraftRecordIdProviderV2, delete=True)
 
 
 class Record(RecordBase):
@@ -77,14 +76,15 @@ class Record(RecordBase):
     # System fields
     #
     #: The internal persistent identifier. Records and drafts share UUID.
-    pid = PIDField('id', provider=DraftRecordIdProviderV2, delete=True)
+    pid = PIDField("id", provider=DraftRecordIdProviderV2, delete=True)
 
     #: System field to check if a record has been published.
     is_published = PIDStatusCheckField(status=PIDStatus.REGISTERED)
 
     #: The parent record - the draft is responsible for creating the parent.
     parent = ParentField(
-        ParentRecord, create=False, soft_delete=False, hard_delete=False)
+        ParentRecord, create=False, soft_delete=False, hard_delete=False
+    )
 
     #: Version relationship
     versions = VersionsField(create=True, set_latest=True)
@@ -161,11 +161,10 @@ class Draft(Record):
     #
 
     #: The internal persistent identifier. Records and drafts share UUID.
-    pid = PIDField('id', provider=DraftRecordIdProviderV2, delete=False)
+    pid = PIDField("id", provider=DraftRecordIdProviderV2, delete=False)
 
     #: The parent record - the draft is responsible for creating the parent.
-    parent = ParentField(
-        ParentRecord, create=True, soft_delete=False, hard_delete=True)
+    parent = ParentField(ParentRecord, create=True, soft_delete=False, hard_delete=True)
 
     #: Version relationship
     versions = VersionsField(create=True, set_next=True)

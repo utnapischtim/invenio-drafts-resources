@@ -12,8 +12,12 @@ import pytest
 from invenio_search import current_search_client
 from jsonschema import ValidationError
 from mock_module.api import Draft, ParentRecord, Record
-from mock_module.models import DraftMetadata, ParentRecordMetadata, \
-    ParentState, RecordMetadata
+from mock_module.models import (
+    DraftMetadata,
+    ParentRecordMetadata,
+    ParentState,
+    RecordMetadata,
+)
 from sqlalchemy import inspect
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -29,20 +33,16 @@ def test_draft_create_empty(app, db, location):
     assert draft.schema
 
     # JSONSchema validation works.
-    pytest.raises(
-        ValidationError,
-        Draft.create,
-        {'metadata': {'title': 1}}
-    )
+    pytest.raises(ValidationError, Draft.create, {"metadata": {"title": 1}})
 
 
 def test_draft_create_parent(app, db, location):
     """Test draft creation of the parent record."""
     draft = Draft.create({})
     db.session.commit()
-    assert draft.schema.endswith('record-v1.0.0.json')
+    assert draft.schema.endswith("record-v1.0.0.json")
     assert draft.pid
-    assert draft.parent.schema.endswith('parent-v1.0.0.json')
+    assert draft.parent.schema.endswith("parent-v1.0.0.json")
     assert draft.parent.pid
 
     assert draft.model.parent_id == draft.model.parent.id
@@ -246,8 +246,9 @@ def test_draft_dump_load_idempotence(app, db, example_draft):
     assert example_draft == loaded_draft
     # Parent was dumped and loaded
     assert example_draft.parent == loaded_draft.parent
-    assert example_draft.versions.is_latest_draft \
-        == loaded_draft.versions.is_latest_draft
+    assert (
+        example_draft.versions.is_latest_draft == loaded_draft.versions.is_latest_draft
+    )
     # Test that SQLAlchemy model was loaded from the JSON and not DB.
     assert not inspect(loaded_draft.parent.model).persistent
     assert not inspect(loaded_draft.versions._state).persistent
@@ -259,16 +260,14 @@ def test_draft_dump_load_idempotence(app, db, example_draft):
 def test_draft_indexing(app, db, es, example_draft, indexer):
     """Test indexing of a draft."""
     # Index document in ES
-    assert indexer.index(example_draft)['result'] == 'created'
+    assert indexer.index(example_draft)["result"] == "created"
     # Retrieve document from ES
     data = current_search_client.get(
-        'draftsresources-drafts-draft-v1.0.0',
-        id=example_draft.id,
-        doc_type='_doc'
+        "draftsresources-drafts-draft-v1.0.0", id=example_draft.id, doc_type="_doc"
     )
 
     # Loads the ES data and compare
-    draft = Draft.loads(data['_source'])
+    draft = Draft.loads(data["_source"])
 
     assert draft == example_draft
     assert draft.id == example_draft.id
@@ -277,12 +276,10 @@ def test_draft_indexing(app, db, es, example_draft, indexer):
     assert draft.updated == example_draft.updated
     assert draft.expires_at == example_draft.expires_at
     assert draft.parent == example_draft.parent
-    assert draft.versions.is_latest_draft == \
-        example_draft.versions.is_latest_draft
-    assert draft.versions.index == \
-        example_draft.versions.index
+    assert draft.versions.is_latest_draft == example_draft.versions.is_latest_draft
+    assert draft.versions.index == example_draft.versions.index
     # Check system fields
-    assert draft.metadata == example_draft['metadata']
+    assert draft.metadata == example_draft["metadata"]
 
 
 def test_draft_delete_reindex(app, db, es, example_draft, indexer):
@@ -290,19 +287,19 @@ def test_draft_delete_reindex(app, db, es, example_draft, indexer):
     draft = example_draft
 
     # Index draft
-    assert indexer.index(draft)['result'] == 'created'
+    assert indexer.index(draft)["result"] == "created"
 
     # Delete record.
     draft.delete()
     db.session.commit()
-    assert indexer.delete(draft)['result'] == 'deleted'
+    assert indexer.delete(draft)["result"] == "deleted"
 
     # Update draft and reindex (this will cause troubles unless proper
     # optimistic concurrency control is used).
     draft.undelete()
     draft.commit()
     db.session.commit()
-    assert indexer.index(draft)['result'] == 'created'
+    assert indexer.index(draft)["result"] == "created"
 
 
 #

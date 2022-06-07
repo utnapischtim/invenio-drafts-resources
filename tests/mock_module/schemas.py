@@ -13,8 +13,9 @@ from marshmallow import Schema, fields, validate
 from marshmallow.utils import get_value
 from marshmallow_utils.fields import SanitizedUnicode
 
-from invenio_drafts_resources.services.records.schema import \
-    RecordSchema as BaseRecordSchema
+from invenio_drafts_resources.services.records.schema import (
+    RecordSchema as BaseRecordSchema,
+)
 
 
 class MetadataSchema(Schema):
