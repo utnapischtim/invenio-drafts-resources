@@ -9,7 +9,7 @@
 
 """Records service component base classes."""
 
-from flask_babelex import gettext as _
+from invenio_i18n import gettext as _
 from invenio_records_resources.services.records.components import ServiceComponent
 
 

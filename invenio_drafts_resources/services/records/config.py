@@ -10,7 +10,7 @@
 
 """RecordDraft Service API config."""
 
-from flask_babelex import gettext as _
+from invenio_i18n import gettext as _
 from invenio_records_resources.services import ConditionalLink, RecordLink
 from invenio_records_resources.services import (
     RecordServiceConfig as RecordServiceConfigBase,
