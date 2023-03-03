@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 1.1.1 (2023-03-03)
+
+- permissions: add can manage files permission to the draft
+
 Version 1.1.0 (2023-03-02)
 
 - remove deprecated flask-babelex dependency and imports
