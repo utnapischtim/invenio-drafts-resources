@@ -9,6 +9,11 @@
 Changes
 =======
 
+Version 1.4.0 (2023-04-25)
+
+- upgrade invenio-records-resources
+- ensure testing of file indexing
+
 Version 1.3.0 (2023-04-20)
 
 - upgrade invenio-records-resources
