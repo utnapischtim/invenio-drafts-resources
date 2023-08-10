@@ -1,5 +1,5 @@
 ..
-    Copyright (C) 2020-2022 CERN.
+    Copyright (C) 2020-2023 CERN.
     Copyright (C) 2020 Northwestern University.
 
     Invenio-Drafts-Resources is free software; you can redistribute it and/or
@@ -8,6 +8,13 @@
 
 Changes
 =======
+
+Version 1.7.0 (2023-09-10)
+
+- records: read_latest method now accepts parent_id and it
+  will return the latest version of a record also by parent_id
+- change error message when publishing with missing files,
+  depending if the record can be metadata only
 
 Version 1.6.0 (2023-07-21)
 
