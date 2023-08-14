@@ -9,7 +9,11 @@
 Changes
 =======
 
-Version 1.7.0 (2023-09-10)
+Version 1.7.1 (2023-08-14)
+
+- fix an issue where the next version of the draft is incorrectly set
+
+Version 1.7.0 (2023-08-10)
 
 - records: read_latest method now accepts parent_id and it
   will return the latest version of a record also by parent_id
