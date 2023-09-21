@@ -9,6 +9,11 @@
 Changes
 =======
 
+Version 1.11.0 (2023-09-21)
+
+- resources: add etag headers
+- resources: add search request param to schema
+
 Version 1.10.1 (2023-09-18)
 
 - models: avoid flushing when getting records
