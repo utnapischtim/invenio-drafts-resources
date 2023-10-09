@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 1.11.2 (2023-10-02)
+
+- components: handle disabled state on draft delete action
+
 Version 1.11.1 (2023-10-02)
 
 - components: replace ambiguous error on publish
