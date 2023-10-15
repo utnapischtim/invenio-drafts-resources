@@ -9,6 +9,12 @@
 Changes
 =======
 
+Version 1.12.2 (2023-10-15)
+
+- service: change from NoResultFound to PIDDoesNotExistsError for consistency
+  in service.read_draft() - affects errors for published records without a
+  draft
+
 Version 1.12.1 (2023-10-10)
 
 - service: allow passing permission_action in kwargs for search versions
