@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 2.0.2 (2023-11-07)
+
+- components: change cleanup method (backwards compatible, performance optimisation)
+
 Version 2.0.1 (2023-10-26)
 
 - fix: TypeError multiple values for record
