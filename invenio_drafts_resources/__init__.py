@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020-2023 CERN.
+# Copyright (C) 2020-2024 CERN.
 # Copyright (C) 2020-2023 Northwestern University.
 #
 # Invenio-Drafts-Resources is free software; you can redistribute it and/or
@@ -10,6 +10,6 @@
 """Invenio Drafts Resources module to create REST APIs."""
 
 
-__version__ = "2.0.2"
+__version__ = "3.0.0"
 
 __all__ = ("__version__",)

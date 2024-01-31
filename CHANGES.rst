@@ -1,5 +1,5 @@
 ..
-    Copyright (C) 2020-2023 CERN.
+    Copyright (C) 2020-2024 CERN.
     Copyright (C) 2020 Northwestern University.
 
     Invenio-Drafts-Resources is free software; you can redistribute it and/or
@@ -8,6 +8,11 @@
 
 Changes
 =======
+
+Version 3.0.0 (released 2024-01-31)
+
+- installation: bump dependencies
+- uow: add "bulk_index" param on ParentRecordCommmitOp
 
 Version 2.0.2 (2023-11-07)
 
