@@ -133,9 +133,8 @@ class _DraftMediaFilesComponent(BaseRecordFilesComponent):
         # We don't copy files from the previous version, but instead allow
         # users to import the files.
         draft_files = self.get_record_files(draft)
-        record_files = self.get_record_files(record)
-        draft_files.enabled = record_files.enabled
-        draft_files.copy(record_files)
+        # Set media files to the default config
+        draft_files.enabled = self.service.config.default_media_files_enabled
 
     def import_files(self, identity, draft=None, record=None):
         """Import files callback."""

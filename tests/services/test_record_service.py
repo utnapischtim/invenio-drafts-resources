@@ -16,11 +16,9 @@ Test to add:
 """
 
 import pytest
-from invenio_db import db
 from invenio_pidstore.errors import PIDDoesNotExistError, PIDUnregistered
 from invenio_pidstore.models import PIDStatus
 from marshmallow.exceptions import ValidationError
-from sqlalchemy.orm.exc import NoResultFound
 
 from .utils import create_and_publish
 

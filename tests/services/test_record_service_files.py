@@ -320,10 +320,15 @@ def test_new_version_with_media_files(
     # New version
     draft = service.new_version(identity_simple, draft.id)
 
-    # objects: 1 media file of the record + 1 file of the record
-    # + 1 media file of the draft (copied to new version) = 3
+    # New versions start with the default files config, i.e. disabled media files, so
+    # we need to enable them.
+    data = draft.to_dict()
+    data["media_files"] = {"enabled": True}
+    draft = service.update_draft(identity_simple, draft.id, data)
+
+    # objects: 1 media file of the record + 1 file of the record = 2
     # file instances: 1 media file of the draft, 1 media file of the new version record
-    assert_counts(buckets=4, objs=3, fileinstances=2, filedrafts=0, filerecords=1)
+    assert_counts(buckets=4, objs=2, fileinstances=2, filedrafts=0, filerecords=1)
 
     # Add file
     add_file_to_draft(service.draft_files, draft.id, "test", identity_simple)
@@ -332,12 +337,12 @@ def test_new_version_with_media_files(
         service_with_media_files.draft_files, draft.id, "test23", identity_simple
     )
 
-    # objects: added 1 file and 1 media file = 5
-    assert_counts(buckets=4, objs=5, fileinstances=4, filedrafts=1, filerecords=1)
+    # objects: added 1 file and 1 media file = 4
+    assert_counts(buckets=4, objs=4, fileinstances=4, filedrafts=1, filerecords=1)
 
     # Publish
     service.publish(identity_simple, draft.id)
-    assert_counts(buckets=4, objs=5, fileinstances=4, filedrafts=0, filerecords=2)
+    assert_counts(buckets=4, objs=4, fileinstances=4, filedrafts=0, filerecords=2)
 
 
 def test_new_version_delete(app, db, service, input_data, identity_simple):
@@ -368,15 +373,21 @@ def test_new_version_with_media_files_delete(
     )
     service.publish(identity_simple, draft.id)
     draft = service.new_version(identity_simple, draft.id)
+
+    # New versions start with the default files config, i.e. disabled media files, so
+    # we need to enable them.
+    data = draft.to_dict()
+    data["media_files"] = {"enabled": True}
+    draft = service.update_draft(identity_simple, draft.id, data)
+
     add_file_to_draft(service.draft_files, draft.id, "test", identity_simple)
     add_file_to_draft(
         service_with_media_files.draft_files, draft.id, "test23", identity_simple
     )
 
-    # objects: 1 media file of the record + 1 file of the record
-    #           + 1 media file of the draft (copied to new version) = 3
+    # objects: 1 media file of the record + 1 file of the record = 2
     #           + 1 media file in a new version + 1 regular file in a new version
-    assert_counts(buckets=4, objs=5, fileinstances=4, filedrafts=1, filerecords=1)
+    assert_counts(buckets=4, objs=4, fileinstances=4, filedrafts=1, filerecords=1)
 
     # Delete new version
     service.delete_draft(identity_simple, draft.id)
@@ -401,7 +412,7 @@ def test_import_files(app, db, service, input_data, identity_simple):
 
 
 def test_import_files_disabled(app, db, service, input_data, identity_simple):
-    """Test new version."""
+    """Test new version of record with disabled files."""
     # Create, publish, new_version
     input_data["files"]["enabled"] = False
     draft = service.create(identity_simple, input_data)
