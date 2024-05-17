@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 3.1.1 (released 2024-05-17)
+
+- services: fix permission for file edit
+
 Version 3.1.0 (released 2024-05-03)
 
 - media-files: prevent copying to new version
