@@ -9,6 +9,11 @@
 Changes
 =======
 
+Version 5.0.0 (released 2024-07-04)
+
+- services: return DraftNotCreatedError on read_draft when no draft available
+            (on published record)
+
 Version 4.0.0 (released 2024-06-04)
 
 - installation: bump invenio-records-resources
