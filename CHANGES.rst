@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 5.1.0 (released 2024-08-09)
+
+- resources: use and adjust vnd.inveniordm.v1+json http accept header
+
 Version 5.0.0 (released 2024-07-04)
 
 - services: return DraftNotCreatedError on read_draft when no draft available
