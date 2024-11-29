@@ -1,6 +1,7 @@
 ..
     Copyright (C) 2020-2024 CERN.
     Copyright (C) 2020 Northwestern University.
+    Copyright (C) 2024 Graz University of Technology.
 
     Invenio-Drafts-Resources is free software; you can redistribute it and/or
     modify it under the terms of the MIT License; see LICENSE file for more
@@ -8,6 +9,13 @@
 
 Changes
 =======
+
+Version 6.0.0 (release 2024-12-10)
+
+- setup: change to reusable workflows
+- setup: bump major dependencies
+- i18n:push translations
+
 
 Version 5.1.0 (released 2024-08-09)
 
